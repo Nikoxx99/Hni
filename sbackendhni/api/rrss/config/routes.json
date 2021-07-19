@@ -1,0 +1,52 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/rrsses",
+      "handler": "rrss.find",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/rrsses/count",
+      "handler": "rrss.count",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/rrsses/:id",
+      "handler": "rrss.findOne",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/rrsses",
+      "handler": "rrss.create",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/rrsses/:id",
+      "handler": "rrss.update",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/rrsses/:id",
+      "handler": "rrss.delete",
+      "config": {
+        "policies": []
+      }
+    }
+  ]
+}

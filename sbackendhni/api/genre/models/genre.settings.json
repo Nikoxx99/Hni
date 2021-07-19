@@ -1,0 +1,25 @@
+{
+  "kind": "collectionType",
+  "collectionName": "genres",
+  "info": {
+    "name": "genre"
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string"
+    },
+    "series": {
+      "via": "genres",
+      "collection": "serie"
+    }
+  }
+}

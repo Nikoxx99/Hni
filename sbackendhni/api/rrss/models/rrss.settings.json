@@ -1,0 +1,24 @@
+{
+  "kind": "collectionType",
+  "collectionName": "rrsses",
+  "info": {
+    "name": "rrss"
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string"
+    },
+    "active": {
+      "type": "boolean"
+    }
+  }
+}

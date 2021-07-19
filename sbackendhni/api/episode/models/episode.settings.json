@@ -1,0 +1,44 @@
+{
+  "kind": "collectionType",
+  "collectionName": "episodes",
+  "info": {
+    "name": "episode",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "series": {
+      "via": "episodes",
+      "model": "serie"
+    },
+    "number": {
+      "type": "integer"
+    },
+    "visible": {
+      "type": "boolean"
+    },
+    "player": {
+      "type": "json"
+    },
+    "downloads": {
+      "type": "json"
+    },
+    "screenshot": {
+      "model": "file",
+      "via": "related",
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos"
+      ],
+      "plugin": "upload",
+      "required": false,
+      "pluginOptions": {}
+    }
+  }
+}

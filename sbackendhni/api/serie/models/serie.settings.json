@@ -1,0 +1,78 @@
+{
+  "kind": "collectionType",
+  "collectionName": "series",
+  "info": {
+    "name": "serie",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "title_english": {
+      "type": "string"
+    },
+    "synopsis": {
+      "type": "string"
+    },
+    "airing": {
+      "type": "boolean"
+    },
+    "censorship": {
+      "type": "boolean"
+    },
+    "featured": {
+      "type": "boolean"
+    },
+    "visits": {
+      "type": "biginteger"
+    },
+    "nextepisode": {
+      "type": "date"
+    },
+    "genres": {
+      "collection": "genre",
+      "via": "series",
+      "dominant": true
+    },
+    "types": {
+      "collection": "type",
+      "via": "series",
+      "dominant": true
+    },
+    "episodes": {
+      "via": "series",
+      "collection": "episode"
+    },
+    "cover": {
+      "model": "file",
+      "via": "related",
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos"
+      ],
+      "plugin": "upload",
+      "required": false,
+      "pluginOptions": {}
+    },
+    "background": {
+      "model": "file",
+      "via": "related",
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos"
+      ],
+      "plugin": "upload",
+      "required": false,
+      "pluginOptions": {}
+    }
+  }
+}
