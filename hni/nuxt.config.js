@@ -1,5 +1,5 @@
 import colors from 'vuetify/es5/util/colors'
-
+require('dotenv').config()
 export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
@@ -12,7 +12,7 @@ export default {
       { name: 'format-detection', content: 'telephone=no' }
     ],
     link: [
-      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+      { rel: 'icon', type: 'image/x-icon', href: 'https://cdn.hentaini.com/favicon.ico' }
     ]
   },
 
@@ -32,14 +32,56 @@ export default {
     // https://go.nuxtjs.dev/eslint
     '@nuxtjs/eslint-module',
     // https://go.nuxtjs.dev/vuetify
-    '@nuxtjs/vuetify'
+    '@nuxtjs/vuetify',
+    '@nuxtjs/dotenv',
+    '@nuxtjs/moment'
   ],
 
+  moment: {
+    timezone: true,
+    locales: ['es']
+  },
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
     // https://go.nuxtjs.dev/pwa
-    '@nuxtjs/pwa'
+    '@nuxtjs/pwa',
+    'nuxt-i18n',
+    '@nuxtjs/strapi'
   ],
+
+  strapi: {
+    url: process.env.API_STRAPI_ENDPOINT,
+    key: 'authToken',
+    expires: '7d'
+  },
+
+  i18n: {
+    lazy: true,
+    locales: [
+      {
+        code: 'en',
+        name: 'English',
+        iso: 'en-US',
+        file: 'en.js'
+      },
+      {
+        code: 'es',
+        name: 'Español',
+        iso: 'es-ES',
+        file: 'es.js'
+      }
+    ],
+    defaultLocale: 'en',
+    strategy: 'prefix_and_default',
+    langDir: 'lang/',
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieDomain: null,
+      cookieKey: 'i18n_redirected',
+      alwaysRedirect: true,
+      fallbackLocale: 'en'
+    }
+  },
 
   // PWA module configuration: https://go.nuxtjs.dev/pwa
   pwa: {

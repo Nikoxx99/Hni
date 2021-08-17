@@ -73,6 +73,9 @@
       "plugin": "upload",
       "required": false,
       "pluginOptions": {}
+    },
+    "nuclearcode": {
+      "type": "string"
     }
   }
 }

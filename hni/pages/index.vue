@@ -1,77 +1,96 @@
 <template>
-  <v-row justify="center" align="center">
-    <v-col cols="12" sm="8" md="6">
-      <v-card class="logo py-4 d-flex justify-center">
-        <NuxtLogo />
-        <VuetifyLogo />
-      </v-card>
-      <v-card>
-        <v-card-title class="headline">
-          Welcome to the Vuetify + Nuxt.js template
-        </v-card-title>
-        <v-card-text>
-          <p>Vuetify is a progressive Material Design component framework for Vue.js. It was designed to empower developers to create amazing applications.</p>
-          <p>
-            For more information on Vuetify, check out the <a
-              href="https://vuetifyjs.com"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              documentation
-            </a>.
-          </p>
-          <p>
-            If you have questions, please join the official <a
-              href="https://chat.vuetifyjs.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              title="chat"
-            >
-              discord
-            </a>.
-          </p>
-          <p>
-            Find a bug? Report it on the github <a
-              href="https://github.com/vuetifyjs/vuetify/issues"
-              target="_blank"
-              rel="noopener noreferrer"
-              title="contribute"
-            >
-              issue board
-            </a>.
-          </p>
-          <p>Thank you for developing with Vuetify and I look forward to bringing more exciting features in the future.</p>
-          <div class="text-xs-right">
-            <em><small>&mdash; John Leider</small></em>
-          </div>
-          <hr class="my-3">
-          <a
-            href="https://nuxtjs.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Nuxt Documentation
-          </a>
-          <br>
-          <a
-            href="https://github.com/nuxt/nuxt.js"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Nuxt GitHub
-          </a>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn
-            color="primary"
-            nuxt
-            to="/inspire"
-          >
-            Continue
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-col>
-  </v-row>
+  <div>
+    <div id="csgoempire" class="container">
+      <div justify-center>
+        <a id="beep" href="https://csgoempire.com/r/UnTalTioYT" target="_blank">
+          <h4 class="rainbow rainbow_text_animated">Wanna try ur luck and make money? Just click here.</h4>
+        </a>
+      </div>
+    </div>
+    <Header />
+    <Carousel />
+    <TagCloud />
+    <LatestEpisodes />
+    <!-- <v-container><v-divider /></v-container>
+    <LatestSeries />
+    <MobileHeader /> -->
+  </div>
 </template>
+
+<script>
+export default {
+  name: 'Index',
+  data () {
+    return {
+      title: 'hentaini | its hanime, thats all.'
+    }
+  },
+  head () {
+    return {
+      title: this.title,
+      meta: [
+        { hid: 'language', name: 'language', content: 'en' },
+        { hid: 'audience', name: 'audience', content: 'all' },
+        { hid: 'rating', name: 'rating', content: 'general' },
+        { hid: 'distribution', name: 'distribution', content: 'global' },
+        { hid: 'document-type', name: 'document-type', content: 'Public' },
+        { hid: 'MSSmartTagsPreventParsing', name: 'MSSmartTagsPreventParsing', content: 'true' },
+        { hid: 'robots', name: 'robots', content: 'all' },
+        { hid: 'robots', name: 'robots', content: 'all, index, follow' },
+        { hid: 'googlebot', name: 'googlebot', content: 'all, index, follow' },
+        { hid: 'yahoo-slurp', name: 'yahoo-slurp', content: 'all, index, follow' },
+        { hid: 'msnbot', name: 'msnbot', content: 'index, follow' },
+        { hid: 'googlebot-image', name: 'googlebot-image', content: 'all' },
+        { hid: 'title', name: 'title', content: this.title },
+        { hid: 'og:title', property: 'og:title', content: this.title },
+        { hid: 'og:description', property: 'og:description', content: 'Its a Hentai site, what do you expect? a no-girlfriend-depression solution?' },
+        { hid: 'og:url', property: 'og:url', content: 'https://hentaini.com' },
+        { hid: 'og:image', property: 'og:image', content: 'https://hentaini.com/hentaini.jpg' },
+        { hid: 'author', name: 'author', content: 'hentaini' }
+      ]
+    }
+  }
+}
+</script>
+<style>
+    .rainbow_text_animated {
+        background: linear-gradient(to right, #6666ff, #0099ff, #00ff00, #ff3399, #6666ff);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: rainbow_animation 1s ease-in-out infinite;
+        background-size: 400% 100%;
+        text-align: center;
+    }
+
+    @keyframes rainbow_animation {
+
+        0%,
+        100% {
+            background-position: 0 0;
+        }
+
+        50% {
+            background-position: 100% 0;
+        }
+    }
+        /* width */
+    ::-webkit-scrollbar {
+    width: 10px;
+    }
+
+    /* Track */
+    ::-webkit-scrollbar-track {
+    background-color:#333;
+    }
+
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+    background: #1294ff;
+    }
+
+    /* Handle on hover */
+    ::-webkit-scrollbar-thumb:hover {
+    background: #1294ff;
+    }
+</style>

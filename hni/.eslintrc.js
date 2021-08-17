@@ -5,15 +5,18 @@ module.exports = {
     node: true
   },
   parserOptions: {
-    parser: '@babel/eslint-parser',
-    requireConfigFile: false
+    ecmaFeatures: {
+      legacyDecorators: true
+    },
+    parser: 'babel-eslint'
   },
   extends: [
     '@nuxtjs',
     'plugin:nuxt/recommended'
   ],
-  plugins: [
-  ],
   // add your custom rules here
-  rules: {}
+  rules: {
+    'nuxt/no-cjs-in-config': 'off',
+    'vue/attribute-hyphenation': 'off'
+  }
 }
