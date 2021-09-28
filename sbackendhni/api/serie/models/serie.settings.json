@@ -50,31 +50,13 @@
       "via": "series",
       "collection": "episode"
     },
-    "cover": {
-      "model": "file",
-      "via": "related",
-      "allowedTypes": [
-        "images",
-        "files",
-        "videos"
-      ],
-      "plugin": "upload",
-      "required": false,
-      "pluginOptions": {}
-    },
-    "background": {
-      "model": "file",
-      "via": "related",
-      "allowedTypes": [
-        "images",
-        "files",
-        "videos"
-      ],
-      "plugin": "upload",
-      "required": false,
-      "pluginOptions": {}
-    },
     "nuclearcode": {
+      "type": "string"
+    },
+    "coverUrl": {
+      "type": "string"
+    },
+    "backgroundUrl": {
       "type": "string"
     }
   }

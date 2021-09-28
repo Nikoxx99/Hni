@@ -22,23 +22,11 @@
     "visible": {
       "type": "boolean"
     },
-    "player": {
-      "type": "json"
+    "players": {
+      "collection": "player"
     },
-    "downloads": {
-      "type": "json"
-    },
-    "screenshot": {
-      "model": "file",
-      "via": "related",
-      "allowedTypes": [
-        "images",
-        "files",
-        "videos"
-      ],
-      "plugin": "upload",
-      "required": false,
-      "pluginOptions": {}
+    "screenshotUrl": {
+      "type": "string"
     }
   }
 }
