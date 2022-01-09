@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid>
+  <v-container v-if="episode" fluid>
     <v-row>
       <v-col cols="12" xl="8" lg="7" md="12" sm="12">
         <v-container>
@@ -20,7 +20,7 @@
               class="d-flex"
             >
               <h2 class="align-self-center">
-                {{ EpisodeByUrlName.serie.title }} • {{ $t('episode.episode_number') }} {{ EpisodeByUrlName.episode_number }}
+                {{ episode.serie.data.attributes.title }} • {{ $t('episode.episode_number') }} {{ episode.episode_number }}
               </h2>
             </v-col>
             <v-col
@@ -35,18 +35,14 @@
                 class="float-right"
               >
                 <v-btn
-                  v-if="episodeCount[0] !== EpisodeByUrlName.episode_number"
-                  :href="'/episode/' + nextEpisodeUrl.concat('/', EpisodeByUrlName.episode_number-1)"
+                  v-if="episodeCount[0] !== episode.episode_number"
+                  :href="`/h/${episode.serie.data.attributes.h_id}/${episode.episode_number-1}`"
                 >
                   <v-icon>mdi-arrow-left</v-icon>
                 </v-btn>
-                <!-- <v-btn>
-                  <v-icon>mdi-view-list</v-icon>
-                  Episode List
-                </v-btn> -->
                 <v-btn
-                  v-if="episodeCount.slice(-1)[0] !== EpisodeByUrlName.episode_number"
-                  :href="'/episode/' + nextEpisodeUrl.concat('/', EpisodeByUrlName.episode_number+1)"
+                  v-if="episodeCount.slice(-1)[0] !== episode.episode_number"
+                  :href="`/h/${episode.serie.data.attributes.h_id}/${episode.episode_number+1}`"
                 >
                   <v-icon>mdi-arrow-right</v-icon>
                 </v-btn>
@@ -62,7 +58,7 @@
               >
                 <v-slide-group show-arrows center-active mandatory>
                   <v-slide-item
-                    v-for="player in EpisodeByUrlName.players"
+                    v-for="player in episode.players"
                     :key="player.name"
                     v-slot:default="{ active, toggle }"
                   >
@@ -86,7 +82,7 @@
             <v-col>
               <v-dialog
                 v-model="modalDownload"
-                width="500"
+                width="900"
               >
                 <template v-slot:activator="{ on, attrs }">
                   <v-btn
@@ -105,7 +101,7 @@
                     class="headline blue darken-2"
                     primary-title
                   >
-                    Download Episode {{ EpisodeByUrlName.episode_number }}
+                    Download Episode {{ episode ? episode.episode_number : null }}
                   </v-card-title>
 
                   <v-card-text class="d-flex justify-center mt-4">
@@ -133,18 +129,18 @@
               class="mx-auto"
               width="100%"
             >
-              <a href="https://tm-offers.gamingadult.com/?offer=47&uid=d1c53b21-f8cb-414d-a456-2f0643c82204">
+              <!-- <a href="https://tm-offers.gamingadult.com/?offer=47&uid=d1c53b21-f8cb-414d-a456-2f0643c82204">
                 <v-img
                   height="auto"
                   class="mb-4"
                   src="/img/animation1.gif"
                 />
-              </a>
+              </a> -->
               <v-img
                 height="auto"
-                :src="`${CDN}/screenshot/${EpisodeByUrlName.screenshot}`"
+                :src="'https://picsum.photos/640/480'"
               />
-              <v-card-title>{{ EpisodeByUrlName.serie.title }}</v-card-title>
+              <v-card-title>{{ episode.serie.title }}</v-card-title>
               <v-card-text>
                 <v-row
                   align="center"
@@ -174,7 +170,7 @@
                     outlined
                     rounded
                   >
-                    {{ EpisodeByUrlName.serie.status }}
+                    {{ episode.serie.data.attributes.statuses.data[0].attributes.name }}
                     <v-icon right>
                       mdi-youtube-tv
                     </v-icon>
@@ -190,7 +186,7 @@
                     {{ $t('episode.add_favorite') }}
                   </v-btn>
                 </div>
-                <div>{{ EpisodeByUrlName.serie.synopsis }}</div>
+                <div>{{ episode.serie.data.attributes.synopsis }}</div>
               </v-card-text>
               <v-divider class="mx-4" />
               <v-card-text>
@@ -199,7 +195,7 @@
                   column
                 >
                   <v-chip
-                    v-for="genre in EpisodeByUrlName.serie.genres"
+                    v-for="genre in episode.serie.data.attributes.genres"
                     :key="genre.text"
                     :href="`/explore?genre=${genre.url}`"
                   >
@@ -220,30 +216,30 @@
                 <div v-show="show">
                   <v-divider />
                   <v-list shaped>
-                    <v-subheader>Episodes for {{ EpisodeByUrlName.serie.title }}</v-subheader>
+                    <v-subheader>Episodes for {{ episode.serie.title }}</v-subheader>
                     <v-list-item-group color="primary">
                       <v-list-item
-                        v-for="episode_item in EpisodeByUrlName.serie.episodes"
-                        :key="episode_item.episode_number"
+                        v-for="episode_item in episode.serie.data.attributes.episodes.data"
+                        :key="episode_item.attributes.episode_number"
                       >
                         <v-list-item-icon>
-                          <span background-color="blue darken-4">{{ episode_item.episode_number }}</span>
+                          <span background-color="blue darken-4">{{ episode_item.attributes.episode_number }}</span>
                         </v-list-item-icon>
                         <v-list-item-content>
-                          <a :href="`/episode/${EpisodeByUrlName.urlName}/${episode_item.episode_number}`"><v-list-item-title v-text="EpisodeByUrlName.serie.title" /></a>
+                          <a :href="`/h/${episode.serie.data.attributes.h_id}/${episode_item.attributes.episode_number}`"><v-list-item-title v-text="episode.serie.data.attributes.title" /></a>
                         </v-list-item-content>
                       </v-list-item>
                     </v-list-item-group>
                   </v-list>
                 </div>
               </v-expand-transition>
-              <a href="https://tm-offers.gamingadult.com/?offer=47&uid=d1c53b21-f8cb-414d-a456-2f0643c82204">
+              <!-- <a href="https://tm-offers.gamingadult.com/?offer=47&uid=d1c53b21-f8cb-414d-a456-2f0643c82204">
                 <v-img
                   height="auto"
                   class="mb-4"
                   src="https://tm-banners.gamingadult.com/5bdc222a9159a.gif"
                 />
-              </a>
+              </a> -->
             </v-card>
           </v-row>
         </v-container>
@@ -262,49 +258,10 @@ export default {
     VideoElement,
     Comments
   },
-  apollo: {
-    EpisodeByUrlName () {
-      return {
-        query: `
-        query ($urlName: String, $episode_number: Int){
-          EpisodeByUrlName(urlName: $urlName, episode_number: $episode_number){
-            serie{
-              _id
-              title
-              synopsis
-              genres{
-                text
-                url
-              }
-              episodes{
-                episode_number
-              }
-              status
-              coverUrl
-            }
-            urlName
-            episode_number
-            screenshot
-            players{
-              name
-              url
-            }
-            downloads{
-              url
-            }
-          }
-        }
-      `,
-        variables: {
-          urlName: this.$route.params.serie,
-          episode_number: Number.parseInt(this.$route.params.episode, 10)
-        }
-      }
-    }
-  },
   data () {
     return {
       CDN: process.env.CDN_URI,
+      episode: null,
       downloadsName: [],
       areDownloadLinksGenerated: false,
       currentUrl: '',
@@ -318,7 +275,7 @@ export default {
         },
         {
           text: 'Serie',
-          disabled: true
+          disabled: false
         },
         {
           text: 'Episode',
@@ -331,90 +288,138 @@ export default {
       user_id: ''
     }
   },
-  mounted () {
-    this.breadcrumb[2].text = 'Episode ' + this.EpisodeByUrlName.episode_number
-    this.breadcrumb[1].text = this.EpisodeByUrlName.serie.title
-    if (this.EpisodeByUrlName.players.length > 0) {
-      this.currentUrl = this.EpisodeByUrlName.players[0].url
-    }
-    for (let i = 0; i < this.EpisodeByUrlName.serie.episodes.length; i++) {
-      this.episodeCount.push(this.EpisodeByUrlName.serie.episodes[i].episode_number)
-    }
-    this.breadcrumb[1].text = this.EpisodeByUrlName.serie.title
-    this.breadcrumb[1].href = this.EpisodeByUrlName.urlName
-    this.nextEpisodeUrl = this.EpisodeByUrlName.urlName
-    if (!this.$store.state.auth) {
-      this.user_id = ''
-    } else {
-      this.user_id = this.$store.state.auth.username
-    }
-    this.$apollo.mutate({
-      mutation: gql`mutation ($input: viewInput){
-        viewRegister(input: $input){
-          success
-          errors{
-            path
-            message
-          }
-        }
-      }`,
-      variables: {
-        input: {
-          serie_id: this.EpisodeByUrlName.serie._id,
-          episode_number: this.EpisodeByUrlName.episode_number,
-          user_id: this.user_id
-        }
-      }
-    })
+  async mounted () {
+    await this.getEpisode()
+    this.genCurrentUrl()
+    this.genBreadcrumb()
+    this.setUserId()
+    // this.$apollo.mutate({
+    //   mutation: gql`mutation ($input: viewInput){
+    //     viewRegister(input: $input){
+    //       success
+    //       errors{
+    //         path
+    //         message
+    //       }
+    //     }
+    //   }`,
+    //   variables: {
+    //     input: {
+    //       serie_id: this.EpisodeByUrlName.serie._id,
+    //       episode_number: this.EpisodeByUrlName.episode_number,
+    //       user_id: this.user_id
+    //     }
+    //   }
+    // })
   },
   methods: {
+    async getEpisode () {
+      const qs = require('qs')
+      const query = qs.stringify({
+        filters: {
+          serie: {
+            h_id: {
+              $eq: this.$route.params.serie
+            }
+          },
+          episode_number: {
+            $eq: this.$route.params.episode
+          }
+        },
+        populate: [
+          'serie',
+          'serie.episodes',
+          'serie.statuses'
+        ],
+        sort: ['createdAt:desc']
+      },
+      {
+        encodeValuesOnly: true
+      })
+      await fetch(`${process.env.API_STRAPI_ENDPOINT}episodes?${query}`)
+        .then(res => res.json())
+        .then((input) => {
+          const res = input.data.map((episode) => {
+            episode.attributes.downloads = JSON.parse(episode.attributes.downloads)
+            episode.attributes.players = JSON.parse(episode.attributes.players)
+            episode.attributes.serie.data.attributes.genres = JSON.parse(episode.attributes.serie.data.attributes.genres)
+            return {
+              ...episode
+            }
+          })
+          console.log(res[0])
+          const resEpisode = res[0].attributes
+          this.episode = resEpisode
+          for (let i = 0; i < resEpisode.serie.data.attributes.episodes.data.length; i++) {
+            this.episodeCount.push(resEpisode.serie.data.attributes.episodes.data[i].attributes.episode_number)
+          }
+          this.nextEpisodeUrl = resEpisode.episode_number
+        })
+    },
     changeCurrentUrl (currentUrl) {
       this.currentUrl = currentUrl
     },
+    genCurrentUrl () {
+      if (this.episode.players.length > 0) {
+        this.currentUrl = this.episode.players[0].url
+      }
+    },
+    genBreadcrumb () {
+      this.breadcrumb[2].text = 'Episode ' + this.episode.episode_number
+      this.breadcrumb[1].text = this.episode.serie.data.attributes.title
+      this.breadcrumb[1].href = `/h/${this.episode.serie.data.attributes.h_id}`
+    },
     genDownloadName () {
       if (!this.areDownloadLinksGenerated) {
-        for (let i = 0; i < this.EpisodeByUrlName.downloads.length; i++) {
+        for (let i = 0; i < this.episode.downloads.length; i++) {
           const regex = /([a-z0-9][a-z0-9-]*)?((\.[a-z]{2,6}))$/
-          const nameDownload = parse(this.EpisodeByUrlName.downloads[i].url, true)
+          const nameDownload = parse(this.episode.downloads[i].url, true)
           const parsedName = nameDownload.host
           const newName = parsedName.match(regex)
           const newDownloadButtons = {}
-          newDownloadButtons.url = this.EpisodeByUrlName.downloads[i]
+          newDownloadButtons.url = this.episode.downloads[i]
           newDownloadButtons.name = newName[1]
           this.downloadsName.push(newDownloadButtons)
           this.areDownloadLinksGenerated = true
         }
       }
-    }
-  },
-  head () {
-    return {
-      title: this.EpisodeByUrlName.serie.title,
-      meta: [
-        { hid: 'language', name: 'language', content: 'es' },
-        { hid: 'Revisit-After', name: 'Revisit-After', content: '3 days' },
-        { hid: 'audience', name: 'audience', content: 'all' },
-        { hid: 'rating', name: 'rating', content: 'general' },
-        { hid: 'distribution', name: 'distribution', content: 'global' },
-        { hid: 'document-type', name: 'document-type', content: 'Public' },
-        { hid: 'MSSmartTagsPreventParsing', name: 'MSSmartTagsPreventParsing', content: 'true' },
-        { hid: 'robots', name: 'robots', content: 'all' },
-        { hid: 'robots', name: 'robots', content: 'all, index, follow' },
-        { hid: 'googlebot', name: 'googlebot', content: 'all, index, follow' },
-        { hid: 'yahoo-slurp', name: 'yahoo-slurp', content: 'all, index, follow' },
-        { hid: 'msnbot', name: 'msnbot', content: 'index, follow' },
-        { hid: 'googlebot-image', name: 'googlebot-image', content: 'all' },
-        { hid: 'title', name: 'title', content: 'Watch ' + this.EpisodeByUrlName.serie.title + ' episode ' + this.EpisodeByUrlName.episode_number + ' free online HD' },
-        { hid: 'description', name: 'description', content: 'Watch online ' + this.EpisodeByUrlName.serie.title + ' in best quality. I mean, its Hentaini, the best place to watch your favourite series' },
-        { hid: 'keywords', name: 'keywords', content: 'Watch online hentai, best HD archive of the best of japanese culture for the world, hentaini, ahegao, yuri, yaoi, tentacle, maid, siscon, brocon' },
-        { hid: 'og:title', property: 'og:title', content: this.EpisodeByUrlName.serie.title },
-        { hid: 'og:description', property: 'og:description', content: 'Its a Hentai site, what do you expect? a no-girlfriend-depression solution?' },
-        { hid: 'og:url', property: 'og:url', content: 'https://hentaini.com' },
-        { hid: 'og:image', property: 'og:image', content: 'https://hentaini.com/screenshot/' + this.EpisodeByUrlName.serie.background_coverUrl },
-        { hid: 'author', name: 'author', content: 'hentaini' }
-      ]
+    },
+    setUserId () {
+      if (!this.$store.state.auth) {
+        this.user_id = ''
+      } else {
+        this.user_id = this.$store.state.auth.username
+      }
     }
   }
+  // head () {
+  //   return {
+  //     title: this.EpisodeByUrlName.serie.title,
+  //     meta: [
+  //       { hid: 'language', name: 'language', content: 'es' },
+  //       { hid: 'Revisit-After', name: 'Revisit-After', content: '3 days' },
+  //       { hid: 'audience', name: 'audience', content: 'all' },
+  //       { hid: 'rating', name: 'rating', content: 'general' },
+  //       { hid: 'distribution', name: 'distribution', content: 'global' },
+  //       { hid: 'document-type', name: 'document-type', content: 'Public' },
+  //       { hid: 'MSSmartTagsPreventParsing', name: 'MSSmartTagsPreventParsing', content: 'true' },
+  //       { hid: 'robots', name: 'robots', content: 'all' },
+  //       { hid: 'robots', name: 'robots', content: 'all, index, follow' },
+  //       { hid: 'googlebot', name: 'googlebot', content: 'all, index, follow' },
+  //       { hid: 'yahoo-slurp', name: 'yahoo-slurp', content: 'all, index, follow' },
+  //       { hid: 'msnbot', name: 'msnbot', content: 'index, follow' },
+  //       { hid: 'googlebot-image', name: 'googlebot-image', content: 'all' },
+  //       { hid: 'title', name: 'title', content: 'Watch ' + this.EpisodeByUrlName.serie.title + ' episode ' + this.EpisodeByUrlName.episode_number + ' free online HD' },
+  //       { hid: 'description', name: 'description', content: 'Watch online ' + this.EpisodeByUrlName.serie.title + ' in best quality. I mean, its Hentaini, the best place to watch your favourite series' },
+  //       { hid: 'keywords', name: 'keywords', content: 'Watch online hentai, best HD archive of the best of japanese culture for the world, hentaini, ahegao, yuri, yaoi, tentacle, maid, siscon, brocon' },
+  //       { hid: 'og:title', property: 'og:title', content: this.EpisodeByUrlName.serie.title },
+  //       { hid: 'og:description', property: 'og:description', content: 'Its a Hentai site, what do you expect? a no-girlfriend-depression solution?' },
+  //       { hid: 'og:url', property: 'og:url', content: 'https://hentaini.com' },
+  //       { hid: 'og:image', property: 'og:image', content: 'https://hentaini.com/screenshot/' + this.EpisodeByUrlName.serie.background_coverUrl },
+  //       { hid: 'author', name: 'author', content: 'hentaini' }
+  //     ]
+  //   }
+  // }
 }
 </script>
 
