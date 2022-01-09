@@ -1,5 +1,5 @@
 <template>
-  <a v-if="!isAd" :href="'/episode/' + url + '/' + episodeNumber">
+  <a v-if="!isAd" :href="'/h/' + hid + '/' + episodeNumber">
     <v-card
       class="mx-auto"
       flat
@@ -11,7 +11,7 @@
           class="white--text"
           style="position:relative"
           :aspect-ratio="16/9"
-          :src="`${CDN}/screenshot/${screenshot}`"
+          :src="screenshot"
         >
           <div
             :class="hover ? 'fill-height gradient gradient-hover' : 'fill-height gradient'"
@@ -87,6 +87,10 @@ export default {
     episodeNumber: {
       type: Number,
       default: 0
+    },
+    hid: {
+      type: String,
+      default: '0'
     },
     status: {
       type: String,

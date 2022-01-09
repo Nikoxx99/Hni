@@ -23,7 +23,7 @@ export default {
   },
   data () {
     return {
-      src404: 'img/404.jpg'
+      src404: 'img/404.jpgs'
     }
   },
   head () {

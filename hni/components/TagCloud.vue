@@ -4,8 +4,8 @@
       v-if="genres"
       style="border-bottom: 1px solid rgb(84 84 84);padding-bottom: 10px;padding-top: 5px;"
     >
-      <v-chip v-for="tag in genres" :key="tag.text" :href="`/explore?genre=${tag.url}`">
-        {{ tag.text }}
+      <v-chip v-for="tag in genres" :key="tag.attributes.url" :href="`/explore?genre=${tag.url}`">
+        {{ tag.attributes.name }}
       </v-chip>
     </v-chip-group>
   </v-container>
@@ -22,13 +22,10 @@ export default {
   },
   methods: {
     async getTags () {
-      await this.$strapi.graphql({
-        query: `query {
-          genres(limit: 20) {
-            name
-            url
-          }
-        }`
+      await this.$strapi.find('genres', {
+        _limit: 20
+      }).then((res) => {
+        this.genres = res.data
       })
     }
   }

@@ -37,22 +37,22 @@
         <li v-if="rrss" class="mr-2">
           <v-tooltip
             v-for="rs in rrss"
-            :key="rs.name"
+            :key="rs.attributes.name"
             bottom
           >
             <template v-slot:activator="{ on, attrs }">
               <v-btn
                 icon
                 large
-                :href="rs.url"
+                :href="rs.attributes.url"
                 target="_blank"
                 v-bind="attrs"
                 v-on="on"
               >
-                <v-icon>mdi-{{ rs.name.toLowerCase() }}</v-icon>
+                <v-icon>mdi-{{ rs.attributes.name.toLowerCase() }}</v-icon>
               </v-btn>
             </template>
-            <span>{{ $t('menu.rrss') }} {{ rs.name }}</span>
+            <span>{{ $t('menu.rrss') }} {{ rs.attributes.name }}</span>
           </v-tooltip>
         </li>
       </ul>
@@ -242,13 +242,10 @@ export default {
   },
   methods: {
     async getRrss () {
-      await this.$strapi.graphql({
-        query: `query {
-          rrsses {
-            name
-            url
-          }
-        }`
+      await this.$strapi.find('rrsses', {
+        _sort: 'created_at:desc'
+      }).then((res) => {
+        this.rrss = res.data
       })
     },
     logout () {

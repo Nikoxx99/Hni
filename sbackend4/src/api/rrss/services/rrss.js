@@ -1,9 +1,9 @@
 'use strict';
 
 /**
- * download service.
+ * rrss service.
  */
 
 const { createCoreService } = require('@strapi/strapi').factories;
 
-module.exports = createCoreService('api::download.download');
+module.exports = createCoreService('api::rrss.rrss');

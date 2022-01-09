@@ -1,9 +1,9 @@
 'use strict';
 
 /**
- *  download controller
+ *  rrss controller
  */
 
 const { createCoreController } = require('@strapi/strapi').factories;
 
-module.exports = createCoreController('api::download.download');
+module.exports = createCoreController('api::rrss.rrss');

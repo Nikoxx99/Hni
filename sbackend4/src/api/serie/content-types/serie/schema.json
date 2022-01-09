@@ -19,7 +19,7 @@
       "type": "string"
     },
     "synopsis": {
-      "type": "string"
+      "type": "text"
     },
     "censorship": {
       "type": "boolean"
@@ -35,12 +35,6 @@
     },
     "hasEpisodes": {
       "type": "boolean"
-    },
-    "genres": {
-      "type": "relation",
-      "relation": "manyToMany",
-      "target": "api::genre.genre",
-      "inversedBy": "series"
     },
     "statuses": {
       "type": "relation",
@@ -71,6 +65,12 @@
       "relation": "oneToMany",
       "target": "api::episode.episode",
       "mappedBy": "serie"
+    },
+    "h_id": {
+      "type": "string"
+    },
+    "genres": {
+      "type": "text"
     }
   }
 }

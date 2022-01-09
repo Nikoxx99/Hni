@@ -24,10 +24,10 @@
         <v-hover
           v-for="serie in searchResult"
           v-slot:default="{ hover }"
-          :key="serie._id"
+          :key="serie.attributes._id"
           class="my-3"
         >
-          <a :href="`/episode/${serie.episodes[0].urlName}/${1}`">
+          <a :href="`/h/${serie.attributes.h_id}`">
             <v-card
               :color="hover ? 'grey darken-3' : 'grey darken-4'"
               class="py-4"
@@ -35,7 +35,7 @@
               <ul>
                 <li>
                   <v-img
-                    :src="`${CDN}/cover/${serie.coverUrl}`"
+                    src="https://picsum.photos/200/300"
                     width="76px"
                     height="76px"
                     class="mr-3"
@@ -44,7 +44,7 @@
                   <span
                     :class="hover ? 'blue--text darken-3' : 'white--text'"
                   >
-                    {{ serie.title }}
+                    {{ serie.attributes.title }}
                   </span>
                 </li>
               </ul>
@@ -69,27 +69,15 @@ export default {
   watch: {
     // eslint-disable-next-line object-shorthand
     search: function (searchQuery) {
-      this.$strapi.graphql({
-        query: `query ($search: String) {
-          search(search: $search) {
-            _id
-            title
-            synopsis
-            coverUrl
-            episodes{
-              urlName
-            }
-          }
-        }`,
-        variables: {
-          search: searchQuery
-        }
-      }).then((input) => {
-        this.searchResult = input.data.search
-      }).catch((error) => {
-        // eslint-disable-next-line no-console
-        console.error(error)
-      })
+      if (searchQuery.length > 2) {
+        const query = `filters[title][$containsi]=${searchQuery}`
+        fetch(`${process.env.API_STRAPI_ENDPOINT}series?${query}`)
+          .then(res => res.json())
+          .then((res) => {
+            console.log(res)
+            this.searchResult = res.data
+          })
+      }
     }
   },
   methods: {

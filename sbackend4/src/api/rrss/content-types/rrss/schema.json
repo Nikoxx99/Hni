@@ -1,11 +1,10 @@
 {
   "kind": "collectionType",
-  "collectionName": "players",
+  "collectionName": "rrsses",
   "info": {
-    "singularName": "player",
-    "pluralName": "players",
-    "displayName": "player",
-    "description": ""
+    "singularName": "rrss",
+    "pluralName": "rrsses",
+    "displayName": "rrss"
   },
   "options": {
     "draftAndPublish": true
@@ -15,11 +14,11 @@
     "name": {
       "type": "string"
     },
-    "short_name": {
+    "url": {
       "type": "string"
     },
-    "player_code": {
-      "type": "string"
+    "active": {
+      "type": "boolean"
     }
   }
 }

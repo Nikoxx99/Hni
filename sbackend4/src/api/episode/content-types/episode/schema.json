@@ -30,21 +30,17 @@
     "urlName": {
       "type": "string"
     },
-    "players": {
-      "type": "relation",
-      "relation": "oneToMany",
-      "target": "api::player.player"
-    },
-    "downloads": {
-      "type": "relation",
-      "relation": "oneToMany",
-      "target": "api::download.download"
-    },
     "serie": {
       "type": "relation",
       "relation": "manyToOne",
       "target": "api::serie.serie",
       "inversedBy": "episodes"
+    },
+    "players": {
+      "type": "text"
+    },
+    "downloads": {
+      "type": "text"
     }
   }
 }

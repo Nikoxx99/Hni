@@ -10,14 +10,14 @@
           <v-icon class="grey--text darken-3">
             mdi-clock-outline
           </v-icon>
-          {{ $t('landpage.updated_text') }} {{ episodes ? $moment(episodes[1].created_at).fromNow() : null }}
+          {{ $t('landpage.updated_text') }} {{ episodes ? $moment(episodes[1].attributes.created_at).fromNow() : null }}
         </h4>
       </v-col>
     </v-row>
     <v-row v-if="episodes">
       <v-col
         v-for="(episode) in episodes"
-        :key="episode._id"
+        :key="episode.attributes._id"
         cols="12"
         lg="3"
         md="4"
@@ -25,14 +25,14 @@
         xs="6"
       >
         <EpisodeCard
-          :episode="episode._id"
-          :title="episode.serie.title"
-          :episodeNumber="episode.episode_number"
-          :status="episode.serie.status"
-          :url="episode.urlName"
-          :screenshot="episode.screenshot"
-          :created="episode.created_at"
-          :isAd="episode.isAd"
+          :episode="episode.attributes._id"
+          :title="episode.attributes.serie.data.attributes.title"
+          :episodeNumber="episode.attributes.episode_number"
+          :hid="episode.attributes.serie.data.attributes.h_id"
+          :status="episode.attributes.serie.data.attributes.statuses.data[0].attributes.name"
+          :url="episode.attributes.urlName"
+          :screenshot="'https://picsum.photos/200/300'"
+          :created="episode.attributes.created_at"
         />
       </v-col>
     </v-row>
@@ -53,22 +53,27 @@ export default {
   },
   methods: {
     async getLatestEpisodes () {
-      await this.$strapi.graphql({
-        query: `query ($limit: Int){
-          episodes(limit: $limit) {
-            _id
-            number
-            series{
-              title
-              airing
-            }
-            createdAt
-          }
-        }`,
-        variables: {
+      const qs = require('qs')
+      const query = qs.stringify({
+        populate: [
+          'serie',
+          'serie.images',
+          'serie.statuses'
+        ],
+        sort: ['createdAt:desc'],
+        pagination: {
           limit: 16
         }
+      },
+      {
+        encodeValuesOnly: true
       })
+      await fetch(`${process.env.API_STRAPI_ENDPOINT}episodes?${query}`)
+        .then(res => res.json())
+        .then((res) => {
+          console.log(res)
+          this.episodes = res.data
+        })
     }
     // createEpisodeAd () {
     //   const ad = {
