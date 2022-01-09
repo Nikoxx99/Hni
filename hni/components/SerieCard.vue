@@ -1,5 +1,5 @@
 <template>
-  <a :href="'/episode/' + url + '/' + 1">
+  <a :href="`/h/${url}`">
     <v-hover v-slot:default="{ hover }">
       <v-card
         class="mx-auto"
@@ -8,7 +8,7 @@
       >
         <v-img
           :aspect-ratio="9/14"
-          :src="`${CDN}/cover/${screenshot}`"
+          :src="screenshot"
         >
           <v-expand-transition>
             <div

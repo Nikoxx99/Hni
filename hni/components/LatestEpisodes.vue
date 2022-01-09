@@ -10,7 +10,7 @@
           <v-icon class="grey--text darken-3">
             mdi-clock-outline
           </v-icon>
-          {{ $t('landpage.updated_text') }} {{ episodes ? $moment(episodes[1].attributes.created_at).fromNow() : null }}
+          {{ $t('landpage.updated_text') }} {{ episodes ? $moment(episodes[1].attributes.createdAt).fromNow() : null }}
         </h4>
       </v-col>
     </v-row>
@@ -32,7 +32,7 @@
           :status="episode.attributes.serie.data.attributes.statuses.data[0].attributes.name"
           :url="episode.attributes.urlName"
           :screenshot="'https://picsum.photos/200/300'"
-          :created="episode.attributes.created_at"
+          :created="episode.attributes.createdAt"
         />
       </v-col>
     </v-row>

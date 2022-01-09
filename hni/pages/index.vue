@@ -4,9 +4,9 @@
     <Carousel />
     <TagCloud />
     <LatestEpisodes />
-    <!-- <v-container><v-divider /></v-container>
+    <v-container><v-divider /></v-container>
     <LatestSeries />
-    <MobileHeader /> -->
+    <MobileHeader />
   </div>
 </template>
 
@@ -15,7 +15,7 @@ export default {
   name: 'Index',
   data () {
     return {
-      title: 'hentaini | its hanime, thats all.'
+      title: 'hentaini | its hentai, thats all.'
     }
   },
   head () {

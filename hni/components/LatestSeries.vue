@@ -10,7 +10,7 @@
     </v-row>
     <v-row>
       <v-col
-        v-for="(serie) in Series"
+        v-for="(serie) in series"
         :key="serie._id"
         cols="6"
         lg="2"
@@ -19,12 +19,12 @@
         xs="6"
       >
         <SerieCard
-          :title="serie.title"
-          :synopsis="serie.synopsis"
-          :genres="serie.genres"
-          :status="serie.status"
-          :url="serie.episodes[0].urlName"
-          :screenshot="serie.coverUrl"
+          :title="serie.attributes.title"
+          :synopsis="serie.attributes.synopsis"
+          :genres="serie.attributes.genres"
+          :status="serie.attributes.statuses.data[0].attributes.name"
+          :url="serie.attributes.h_id"
+          :screenshot="'https://picsum.photos/720/1280'"
         />
       </v-col>
     </v-row>
@@ -34,39 +34,40 @@
 <script>
 
 export default {
-  apollo: {
-    Series: {
-      query: `
-        query ($limit: Int){
-          Series(limit: $limit){
-            _id
-            episodes{
-              episode_number
-              urlName
-            }
-            genres{
-              name
-              url
-            }
-            title
-            synopsis
-            status
-            coverUrl
-          }
-        }
-      `,
-      variables: {
-        limit: 24
-      }
-    }
-  },
   data () {
     return {
-      Series: {
-        episodes: {
-          urlName: ''
+      series: []
+    }
+  },
+  mounted () {
+    this.getLatestSeries()
+  },
+  methods: {
+    async getLatestSeries () {
+      const qs = require('qs')
+      const query = qs.stringify({
+        populate: [
+          'statuses'
+        ],
+        sort: ['createdAt:desc'],
+        pagination: {
+          limit: 24
         }
-      }
+      },
+      {
+        encodeValuesOnly: true
+      })
+      await fetch(`${process.env.API_STRAPI_ENDPOINT}series?${query}`)
+        .then(res => res.json())
+        .then((input) => {
+          const res = input.data.map((serie) => {
+            serie.attributes.genres = JSON.parse(serie.attributes.genres)
+            return {
+              ...serie
+            }
+          })
+          this.series = res
+        })
     }
   }
 }
