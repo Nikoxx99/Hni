@@ -5,7 +5,7 @@
         <v-container>
           <v-row class="d-none d-md-flex d-lg-flex d-xl-flex">
             <v-col style="padding-top:0">
-              <v-breadcrumbs :items="breadcrumb" divider="•" style="padding:1rem 1rem 1rem 1rem" class="grey darken-4" />
+              <v-breadcrumbs :items="breadcrumb" divider="•" class="pl-0 pb-0" />
             </v-col>
           </v-row>
           <v-row
@@ -19,9 +19,9 @@
               xs="12"
               class="d-flex"
             >
-              <h2 class="align-self-center">
-                {{ episode.serie.data.attributes.title }} • {{ $t('episode.episode_number') }} {{ episode.episode_number }}
-              </h2>
+              <h1 class="align-self-center text-h5 text-md-h4 text-lg-h4">
+                {{ serie.title }} • {{ $t('episode.episode_number') }} {{ episode.episode_number }}
+              </h1>
             </v-col>
             <v-col
               cols="12"
@@ -39,6 +39,11 @@
                   :href="`/h/${episode.serie.data.attributes.h_id}/${episode.episode_number-1}`"
                 >
                   <v-icon>mdi-arrow-left</v-icon>
+                </v-btn>
+                <v-btn
+                  :href="`/h/${episode.serie.data.attributes.h_id}`"
+                >
+                  <v-icon>mdi-view-list</v-icon>
                 </v-btn>
                 <v-btn
                   v-if="episodeCount.slice(-1)[0] !== episode.episode_number"
@@ -88,6 +93,8 @@
                   <v-btn
                     color="blue darken-4"
                     dark
+                    elevation="0"
+                    rounded
                     v-bind="attrs"
                     v-on="on"
                     @click="genDownloadName"
@@ -101,7 +108,7 @@
                     class="headline blue darken-2"
                     primary-title
                   >
-                    Download Episode {{ episode ? episode.episode_number : null }}
+                    Download Episode {{ episode.episode_number }}
                   </v-card-title>
 
                   <v-card-text class="d-flex justify-center mt-4">
@@ -117,17 +124,20 @@
                   </v-card-text>
                 </v-card>
               </v-dialog>
-              <Comments />
             </v-col>
           </v-row>
+          <v-divider class="mt-4" />
+          <Comments />
         </v-container>
       </v-col>
       <v-col cols="12" xl="4" lg="5" md="12" sm="12">
         <v-container>
           <v-row>
             <v-card
-              class="mx-auto"
+              class="mx-auto transparent"
               width="100%"
+              elevation="0"
+              tile
             >
               <!-- <a href="https://tm-offers.gamingadult.com/?offer=47&uid=d1c53b21-f8cb-414d-a456-2f0643c82204">
                 <v-img
@@ -140,7 +150,7 @@
                 height="auto"
                 :src="'https://picsum.photos/640/480'"
               />
-              <v-card-title>{{ episode.serie.title }}</v-card-title>
+              <v-card-title>{{ serie.title }}</v-card-title>
               <v-card-text>
                 <v-row
                   align="center"
@@ -170,7 +180,7 @@
                     outlined
                     rounded
                   >
-                    {{ episode.serie.data.attributes.statuses.data[0].attributes.name }}
+                    {{ statuses.name }}
                     <v-icon right>
                       mdi-youtube-tv
                     </v-icon>
@@ -195,7 +205,7 @@
                   column
                 >
                   <v-chip
-                    v-for="genre in episode.serie.data.attributes.genres"
+                    v-for="genre in genres"
                     :key="genre.text"
                     :href="`/explore?genre=${genre.url}`"
                   >
@@ -216,17 +226,17 @@
                 <div v-show="show">
                   <v-divider />
                   <v-list shaped>
-                    <v-subheader>Episodes for {{ episode.serie.title }}</v-subheader>
+                    <v-subheader>Episodes for {{ serie.title }}</v-subheader>
                     <v-list-item-group color="primary">
                       <v-list-item
-                        v-for="episode_item in episode.serie.data.attributes.episodes.data"
+                        v-for="episode_item in episodes"
                         :key="episode_item.attributes.episode_number"
                       >
                         <v-list-item-icon>
                           <span background-color="blue darken-4">{{ episode_item.attributes.episode_number }}</span>
                         </v-list-item-icon>
                         <v-list-item-content>
-                          <a :href="`/h/${episode.serie.data.attributes.h_id}/${episode_item.attributes.episode_number}`"><v-list-item-title v-text="episode.serie.data.attributes.title" /></a>
+                          <a :href="`/h/${serie.h_id}/${episode_item.attributes.episode_number}`"><v-list-item-title v-text="serie.title" /></a>
                         </v-list-item-content>
                       </v-list-item>
                     </v-list-item-group>
@@ -262,6 +272,10 @@ export default {
     return {
       CDN: process.env.CDN_URI,
       episode: null,
+      episodes: null,
+      serie: null,
+      statuses: null,
+      genres: null,
       downloadsName: [],
       areDownloadLinksGenerated: false,
       currentUrl: '',
@@ -349,7 +363,15 @@ export default {
           })
           console.log(res[0])
           const resEpisode = res[0].attributes
+          const resSerie = res[0].attributes.serie.data.attributes
+          const resStatuses = res[0].attributes.serie.data.attributes.statuses.data[0].attributes
+          const resGenres = res[0].attributes.serie.data.attributes.genres
+          const resEpisodes = res[0].attributes.serie.data.attributes.episodes.data
           this.episode = resEpisode
+          this.serie = resSerie
+          this.statuses = resStatuses
+          this.genres = resGenres
+          this.episodes = resEpisodes
           for (let i = 0; i < resEpisode.serie.data.attributes.episodes.data.length; i++) {
             this.episodeCount.push(resEpisode.serie.data.attributes.episodes.data[i].attributes.episode_number)
           }

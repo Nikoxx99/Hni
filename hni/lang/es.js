@@ -31,6 +31,10 @@ export default {
     show_episodes: 'Mostrar Episodios',
     comments_section_header: 'Comentarios'
   },
+  serie: {
+    synopsis: 'Sinopsis: ',
+    genres: 'Géneros '
+  },
   explore: {
     title: '¿Ella no te ama? Explora nuestro catálogo.',
     subtitle: 'En esta página puedes buscar el mejor Hentai que hay.',

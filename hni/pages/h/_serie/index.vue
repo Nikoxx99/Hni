@@ -1,3 +1,6 @@
 <template>
-  <h1>Serie uwu</h1>
+  <main>
+    <Header />
+    <SerieRender />
+  </main>
 </template>

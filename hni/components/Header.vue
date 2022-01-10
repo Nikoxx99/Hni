@@ -1,9 +1,9 @@
 <template>
   <div>
     <v-toolbar
-      dark
       style="position:relative;z-index:1"
       flat
+      class="hnibg"
     >
       <v-app-bar-nav-icon
         class="d-flex d-md-none d-lg-none d-lx-flex"
@@ -257,5 +257,21 @@ export default {
 </script>
 
 <style>
-
+.hnibg {
+  background-color: rgba(0,0,0,0)!important;
+}
+.hnibg::after {
+  content: '';
+  z-index: -1;
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  pointer-events: none;
+  transition: .2s;
+  height: 160px!important;
+  opacity: .9;
+  background: linear-gradient(to bottom,rgba(20,26,50,1) 1%,rgba(20,26,50,0) 100%)!important;
+  box-shadow: none;
+}
 </style>

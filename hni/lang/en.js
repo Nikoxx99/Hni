@@ -31,6 +31,10 @@ export default {
     show_episodes: 'Show Episodes',
     comments_section_header: 'Comments'
   },
+  serie: {
+    synopsis: 'Synopsis: ',
+    genres: 'Genres '
+  },
   explore: {
     title: 'No GF? No problem. Explore our catalog.',
     subtitle: 'You can serch for the best Hentai out there in this page.',
