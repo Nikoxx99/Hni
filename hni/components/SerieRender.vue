@@ -169,7 +169,6 @@ export default {
               ...serie
             }
           })
-          console.log(resSerie)
           this.serie = resSerie[0].attributes
           this.genres = resSerie[0].attributes.genres
           this.status = resSerie[0].attributes.statuses.data[0].attributes.name

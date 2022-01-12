@@ -40,27 +40,33 @@
               v-model="expandedFilterBy"
               multiple
               tile
+              flat
+              class="transparent"
             >
-              <v-expansion-panel>
+              <v-expansion-panel class="transparent">
                 <v-expansion-panel-header>{{ $t('explore.filter.title') }}</v-expansion-panel-header>
                 <v-expansion-panel-content class="px-0">
                   <v-list
                     rounded
                     :subheader="false"
+                    class="transparent"
                   >
-                    <v-list-item
-                      v-for="filter in Filters"
-                      :key="filter.id"
-                      :href="`/explore?filter=${filter.url}`"
-                      :class="filter.class"
+                    <v-list-item-group
+                      color="primary"
                     >
-                      <v-list-item-icon>
-                        <v-icon>mdi-filter</v-icon>
-                      </v-list-item-icon>
-                      <v-list-item-content>
-                        <v-list-item-title v-text="filter.name" />
-                      </v-list-item-content>
-                    </v-list-item>
+                      <v-list-item
+                        v-for="(filter, index) in filtersUI"
+                        :key="filter.id"
+                        @click="selectFilter(index)"
+                      >
+                        <v-list-item-icon>
+                          <v-icon>mdi-filter</v-icon>
+                        </v-list-item-icon>
+                        <v-list-item-content>
+                          <v-list-item-title v-text="filter.name" />
+                        </v-list-item-content>
+                      </v-list-item>
+                    </v-list-item-group>
                   </v-list>
                 </v-expansion-panel-content>
               </v-expansion-panel>
@@ -69,27 +75,32 @@
               v-model="expandedOrderBy"
               multiple
               tile
+              flat
             >
-              <v-expansion-panel class="blue darken-4">
+              <v-expansion-panel class="transparent">
                 <v-expansion-panel-header>{{ $t('explore.order_by.title') }}</v-expansion-panel-header>
                 <v-expansion-panel-content class="px-0">
                   <v-list
                     rounded
-                    class="blue darken-4 px-0"
                     :subheader="false"
+                    class="transparent px-0"
                   >
-                    <v-list-item
-                      v-for="order in Orders"
-                      :key="order.id"
-                      :href="`/explore?order=${order.url}`"
+                    <v-list-item-group
+                      color="primary"
                     >
-                      <v-list-item-icon>
-                        <v-icon>mdi-filter</v-icon>
-                      </v-list-item-icon>
-                      <v-list-item-content>
-                        <v-list-item-title v-text="order.name" />
-                      </v-list-item-content>
-                    </v-list-item>
+                      <v-list-item
+                        v-for="(order, index) in orderUI"
+                        :key="order.id"
+                        @click="selectOrder(index)"
+                      >
+                        <v-list-item-icon>
+                          <v-icon>mdi-filter</v-icon>
+                        </v-list-item-icon>
+                        <v-list-item-content>
+                          <v-list-item-title v-text="order.name" />
+                        </v-list-item-content>
+                      </v-list-item>
+                    </v-list-item-group>
                   </v-list>
                 </v-expansion-panel-content>
               </v-expansion-panel>
@@ -98,24 +109,25 @@
               v-model="expanded"
               multiple
               tile
+              flat
             >
-              <v-expansion-panel>
+              <v-expansion-panel class="transparent">
                 <v-expansion-panel-header>{{ $t('explore.genres') }}</v-expansion-panel-header>
                 <v-expansion-panel-content class="px-0">
                   <v-list
                     rounded
-                    class="px-0"
+                    class="px-0 transparent"
                   >
                     <v-list-item
-                      v-for="genre in Genres"
-                      :key="genre.text"
+                      v-for="genre in genres"
+                      :key="genre.name"
                       :href="`/explore?genre=${genre.url}`"
                     >
                       <v-list-item-icon>
                         <v-icon>mdi-folder-search-outline</v-icon>
                       </v-list-item-icon>
                       <v-list-item-content>
-                        <v-list-item-title v-text="genre.text" />
+                        <v-list-item-title v-text="genre.name" />
                       </v-list-item-content>
                     </v-list-item>
                   </v-list>
@@ -132,9 +144,17 @@
             class="pa-0"
           >
             <v-container class="pa-0">
+              <v-row class="justify-center">
+                <v-pagination
+                  v-model="pagination.page"
+                  :length="pagination.pageCount"
+                  :total-visible="6"
+                  circle
+                />
+              </v-row>
               <v-row>
                 <v-col
-                  v-for="serie in Series"
+                  v-for="serie in series"
                   :key="serie._id"
                   cols="4"
                   lg="3"
@@ -146,8 +166,8 @@
                     :synopsis="serie.synopsis"
                     :genres="serie.genres"
                     :status="serie.status"
-                    :url="serie.episodes[0].urlName"
-                    :screenshot="serie.coverUrl"
+                    :url="serie.h_id"
+                    :screenshot="'https://picsum.photos/720/1280'"
                   />
                 </v-col>
               </v-row>
@@ -169,18 +189,34 @@ export default {
       expandedFilterBy: [0],
       innerWidth: 0,
       prettyGenre: '',
-      Genres: {
+      series: [],
+      seriesCount: 0,
+      lastFilter: null,
+      lastOrder: null,
+      genres: {
         episodes: {
           urlName: ''
         }
       },
-      Orders: [
+      defaultOrder: [
+        'createdAt:desc'
+      ],
+      sort: [
+        'createdAt:desc'
+      ],
+      filters: {},
+      pagination: {
+        page: 1,
+        pageSize: 24
+      },
+      filtersUI: [
+        { id: 1, name: this.$t('explore.filter.airing'), url: 'airing', class: 'grey darken-4' },
+        { id: 2, name: this.$t('explore.filter.finalized'), url: 'finalized', class: 'grey darken-4' },
+        { id: 3, name: this.$t('explore.filter.censorship'), url: 'no-censorship', class: 'grey darken-4' }
+      ],
+      orderUI: [
         { id: 1, name: this.$t('explore.order_by.most_views'), url: 'ascending' },
         { id: 2, name: this.$t('explore.order_by.low_views'), url: 'descending' }
-      ],
-      Filters: [
-        { id: 1, name: this.$t('explore.filter.airing'), url: 'airing', class: 'grey darken-4' },
-        { id: 2, name: this.$t('explore.filter.censorship'), url: 'no-censorship', class: 'grey darken-4' }
       ],
       breadcrumb: [
         {
@@ -196,6 +232,12 @@ export default {
     }
   },
   watch: {
+    'pagination.page': {
+      handler () {
+        this.getSeries()
+      },
+      deep: false
+    },
     innerWidth (innerWidth) {
       if (innerWidth < 1264) {
         this.expanded = []
@@ -208,53 +250,144 @@ export default {
       }
     }
   },
-  mounted () {
-    this.getGenres()
-    this.getSeries()
-    this.order()
+  async mounted () {
+    await this.getSeriesCount()
+    await this.getSeries()
+    await this.getGenres()
+    await this.prettyGenreName()
   },
   beforeMount () {
     this.getSize()
   },
   methods: {
     async getSeries () {
-      await this.$strapi.graphql({
-        query: `query ($limit: Int, $order: String, $filter: String, $genre: String) {
-          series(limit: $limit, order: $order, filter: $filter, genre: $genre) {
-            title
-            synopsis
-            episodes{
-              episode_number
-              urlName
-            }
-            genres{
-              name
-            }
-            status
-            coverUrl
-          }
-        }`
+      const qs = require('qs')
+      const query = qs.stringify({
+        filters: this.filters,
+        sort: this.sort,
+        pagination: this.pagination,
+        populate: [
+          'images',
+          'images.image_type',
+          'statuses',
+          'episodes'
+        ]
+      },
+      {
+        encodeValuesOnly: true
       })
+      await fetch(`${process.env.API_STRAPI_ENDPOINT}series?${query}`)
+        .then(res => res.json())
+        .then((series) => {
+          console.log(series)
+          const resSerie = series.data.map((serie) => {
+            serie.attributes.genres = JSON.parse(serie.attributes.genres)
+            const status = serie.attributes.statuses.data[0].attributes
+            const images = serie.attributes.images.data
+            this.pagination = series.meta.pagination
+            return {
+              ...serie,
+              status,
+              images
+            }
+          })
+          console.log(resSerie)
+          this.series = resSerie.map((serie) => {
+            const data = serie.attributes
+            return data
+          })
+        })
     },
     async getGenres () {
-      await this.$strapi.graphql({
-        query: `query {
-          genres(limit: 1000) {
-            name
-            url
-          }
-        }`
+      const qs = require('qs')
+      const query = qs.stringify({
+        sort: [
+          'name:asc'
+        ],
+        pagination: {
+          page: 1,
+          pageSize: 100
+        }
+      },
+      {
+        encodeValuesOnly: true
       })
+      await fetch(`${process.env.API_STRAPI_ENDPOINT}genres?${query}`)
+        .then(res => res.json())
+        .then((genres) => {
+          const resGenres = genres.data.map((genre) => {
+            return genre.attributes
+          })
+          console.log(resGenres)
+          this.genres = resGenres
+        })
     },
-    order () {
-      if (this.$route.query.filter) {
-        const filter = this.$route.query.filter
-        if (filter === 'airing') {
-          this.Filters[0].class = 'blue darken-4'
-        } else if (filter === 'no-censorship') {
-          this.Filters[1].class = 'blue darken-4'
+    async getSeriesCount () {
+      const qs = require('qs')
+      const query = qs.stringify({
+        filds: [
+          'id'
+        ]
+      },
+      {
+        encodeValuesOnly: true
+      })
+      await fetch(`${process.env.API_STRAPI_ENDPOINT}series?${query}`)
+        .then(res => res.json())
+        .then((series) => {
+          this.seriesCount = Math.floor(series.data.length / this.pagination.pageSize)
+        })
+    },
+    selectFilter (filter) {
+      if (this.lastFilter === filter) {
+        this.filters = {}
+        this.getSeries()
+        this.lastFilter = null
+        return
+      }
+      const airingFilter = {
+        statuses: {
+          name: {
+            $eq: 'Airing'
+          }
         }
       }
+      const finalizedFilter = {
+        statuses: {
+          name: {
+            $eq: 'Finalized'
+          }
+        }
+      }
+      const censorshipFilter = {
+        censorship: {
+          $eq: false
+        }
+      }
+      if (filter === 0) {
+        this.filters = airingFilter
+      } else if (filter === 1) {
+        this.filters = finalizedFilter
+      } else if (filter === 2) {
+        this.filters = censorshipFilter
+      }
+      this.getSeries()
+      this.lastFilter = filter
+    },
+    selectOrder (order) {
+      if (this.lastOrder === order) {
+        this.sort[0] = 'createdAt:desc'
+        this.getSeries()
+        this.lastOrder = null
+        return
+      }
+      if (order === 0) {
+        this.sort[0] = 'visits:desc'
+      } else if (order === 1) {
+        this.sort[0] = 'createdAt:desc'
+      }
+      this.getSeries()
+      this.lastOrder = order
     },
     getSize () {
       window.addEventListener('resize', () => {
@@ -270,9 +403,11 @@ export default {
         this.expandedOrderBy = [0]
         this.expandedFilterBy = [0]
       }
+    },
+    prettyGenreName () {
       if (this.$route.query.genre) {
-        const g = this.Genres.find(genre => genre.url === this.$route.query.genre)
-        this.prettyGenre = g.text
+        const g = this.genres.find(genre => genre.url === this.$route.query.genre)
+        this.prettyGenre = g.name
       }
     }
   }

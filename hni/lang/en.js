@@ -36,7 +36,7 @@ export default {
     genres: 'Genres '
   },
   explore: {
-    title: 'No GF? No problem. Explore our catalog.',
+    title: 'Explore our catalog.',
     subtitle: 'You can serch for the best Hentai out there in this page.',
     on_genre_title_part_1: 'No GF? No problem. Explore our',
     on_genre_title_part_2: 'catalog',
@@ -45,12 +45,13 @@ export default {
     filter: {
       title: 'FILTER',
       airing: 'Airing',
+      finalized: 'Finalized',
       censorship: 'No Censorship'
     },
     order_by: {
       title: 'ORDER BY',
       most_views: 'Most Views',
-      low_views: 'Low Views'
+      low_views: 'Newest'
     },
     genres: 'HENTAI GENRES'
   }

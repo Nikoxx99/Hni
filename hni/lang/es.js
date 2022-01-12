@@ -45,12 +45,13 @@ export default {
     filter: {
       title: 'FILTRA',
       airing: 'En Emisión',
+      finalized: 'Finalizado',
       censorship: 'Sin Censura'
     },
     order_by: {
       title: 'ORDENAR POR',
       most_views: 'Mas Vistos',
-      low_views: 'Menos Vistos'
+      low_views: 'Nuevos'
     },
     genres: 'BUSCAR POR GÉNERO'
   }
