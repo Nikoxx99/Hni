@@ -2,7 +2,7 @@
   <div v-if="serie">
     <v-container fluid class="m0 pa-0">
       <v-img
-        src="https://picsum.photos/1920/1080"
+        :src="`${$config.SCREENSHOT_ENDPOINT}${serie.images.screenshot.path}`"
         alt=""
         aspect-ratio="16/9"
         style="position: absolute; top: 0; left: 0; width: 100%; height:100vh;filter:blur(10px);"
@@ -25,9 +25,7 @@
           <v-row>
             <v-col cols="12">
               <v-img
-                :src="cover ? cover.path : 'default.jpg'"
-                class="mx-auto"
-                height="auto"
+                :src="`${$config.COVER_ENDPOINT}${serie.images.cover.path}`"
                 style="max-height:415px;border-radius:10px;"
               />
             </v-col>
@@ -66,7 +64,7 @@
           <v-row v-if="serie.title_english" class="px-4 py-5">
             {{ serie.title_english }}
           </v-row>
-          <v-row class="px-4 pb-5">
+          <v-row class="px-4 pb-2">
             <v-alert
               dense
               text
@@ -76,7 +74,7 @@
               <strong>{{ status }}</strong>
             </v-alert>
           </v-row>
-          <v-row class="px-4 py-5">
+          <v-row class="px-4">
             <v-alert
               border="left"
               colored-border
@@ -102,14 +100,17 @@
               {{ genre.text }}
             </v-chip>
           </v-row>
-          <v-row class="mt-10">
+          <v-row class="mt-10 mb-5">
             <SerieEpisodeList :serie="serie" :episodes="episodes" />
           </v-row>
-          <v-row class="mt-10">
-            <v-col>
-              <LayoutComments />
-            </v-col>
-          </v-row>
+        </v-col>
+      </v-row>
+      <v-row>
+        <ExploreCluster />
+      </v-row>
+      <v-row class="mt-10">
+        <v-col>
+          <LayoutComments />
         </v-col>
       </v-row>
     </v-container>
@@ -165,6 +166,8 @@ export default {
         .then((series) => {
           const resSerie = series.data.map((serie) => {
             serie.attributes.genres = JSON.parse(serie.attributes.genres)
+            serie.attributes.images.cover = serie.attributes.images.data.filter(image => image.attributes.image_type.data.attributes.name === 'cover')[0].attributes
+            serie.attributes.images.screenshot = serie.attributes.images.data.filter(image => image.attributes.image_type.data.attributes.name === 'screenshot')[0].attributes
             return {
               ...serie
             }
@@ -177,19 +180,7 @@ export default {
               ...episode.attributes
             }
           })
-          const images = resSerie[0].attributes.images.data.map((image) => {
-            return {
-              ...image.attributes,
-              image_type: image.attributes.image_type.data.attributes.name
-            }
-          })
           this.episodes = episodes
-          this.cover = images.filter((image) => {
-            return image.image_type === 'cover'
-          })[0]
-          this.screenshot = images.filter((image) => {
-            return image.image_type === 'screenshot'
-          })[0]
           this.breadcrumb[1].text = this.serie.title
         })
     }

@@ -1,19 +1,21 @@
 <template>
   <v-container fluid>
-    <v-row
+    <a
       v-for="(episode, index) in episodes"
       :key="index"
-      class="episode"
+      :href="`/h/${serie.h_id}/${episode.episode_number}`"
     >
-      <v-icon x-large>
-        mdi-play
-      </v-icon>
-      <h3 class="mt-2">
-        <a :href="`/h/${serie.h_id}/${episode.episode_number}`">
+      <v-row
+        class="episode"
+      >
+        <v-icon x-large>
+          mdi-play
+        </v-icon>
+        <h3 class="mt-2">
           {{ serie.title }} episode {{ episode.episode_number }}
-        </a>
-      </h3>
-    </v-row>
+        </h3>
+      </v-row>
+    </a>
   </v-container>
 </template>
 <script>
@@ -39,8 +41,7 @@ export default {
   .episode {
     border-bottom: 2px solid rgb(255 255 240 / 33%);
     padding:10px;
-  }
-  .episode > h3 > a {
+    margin-top:10px;
     color: white!important;
   }
   .episode:hover {

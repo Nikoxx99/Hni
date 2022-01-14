@@ -19,12 +19,12 @@
         xs="6"
       >
         <SerieCard
-          :title="serie.attributes.title"
-          :synopsis="serie.attributes.synopsis"
-          :genres="serie.attributes.genres"
-          :status="serie.attributes.statuses.data[0].attributes.name"
-          :url="serie.attributes.h_id"
-          :screenshot="'https://picsum.photos/720/1280'"
+          :title="serie.title"
+          :synopsis="serie.synopsis"
+          :genres="serie.genres"
+          :status="serie.statuses.name"
+          :url="serie.h_id"
+          :screenshot="`${$config.COVER_ENDPOINT}${serie.images.cover.path}`"
         />
       </v-col>
     </v-row>
@@ -47,7 +47,9 @@ export default {
       const qs = require('qs')
       const query = qs.stringify({
         populate: [
-          'statuses'
+          'statuses',
+          'images',
+          'images.image_type'
         ],
         sort: ['createdAt:desc'],
         pagination: {
@@ -62,8 +64,11 @@ export default {
         .then((input) => {
           const res = input.data.map((serie) => {
             serie.attributes.genres = JSON.parse(serie.attributes.genres)
+            serie.attributes.images.cover = serie.attributes.images.data.filter(image => image.attributes.image_type.data.attributes.name === 'cover')[0].attributes
+            serie.attributes.images.screenshot = serie.attributes.images.data.filter(image => image.attributes.image_type.data.attributes.name === 'screenshot')[0].attributes
+            serie.attributes.statuses = serie.attributes.statuses.data[0].attributes
             return {
-              ...serie
+              ...serie.attributes
             }
           })
           this.series = res

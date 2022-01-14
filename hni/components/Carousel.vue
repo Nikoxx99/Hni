@@ -3,7 +3,7 @@
     <v-carousel-item
       v-for="serie in featuredSeries"
       :key="serie.title"
-      :src="`${serie.images.path}`"
+      :src="`http://localhost:1337/cdn/screenshot/${serie.images.path}`"
       :href="`h/${serie.h_id}`"
       gradient="to top right, rgba(0,0,0,.8), rgba(0,0,0,.2)"
     >
@@ -59,6 +59,7 @@ export default {
         },
         populate: [
           'images',
+          'images.image_type',
           'statuses'
         ],
         sort: ['createdAt:desc']
@@ -73,7 +74,7 @@ export default {
             serie.attributes.genres = JSON.parse(serie.attributes.genres)
             serie = serie.attributes
             serie.statuses = serie.statuses.data[0].attributes
-            serie.images = serie.images.data[0].attributes
+            serie.images = serie.images.data.filter(image => image.attributes.image_type.data.attributes.name === 'screenshot')[0].attributes
             return {
               ...serie
             }

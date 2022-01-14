@@ -1,15 +1,10 @@
 <template>
   <v-container fluid>
+    <v-row class="mt-10 mb-5">
+      <ExploreCluster />
+    </v-row>
     <v-row>
       <v-container class="pb-0">
-        <v-row>
-          <v-breadcrumbs
-            :items="breadcrumb"
-            divider="•"
-            style="padding:1rem 1rem 1rem 1rem"
-            class="grey darken-4 rounded-r-xl"
-          />
-        </v-row>
         <v-row>
           <v-col v-if="$route.query.genre" cols="12" class="mt-4 px-2">
             <h1>{{ $t('explore.on_genre_title_part_1') }} <strong class="blue--text darken-4"> {{ prettyGenre }} </strong> {{ $t('explore.on_genre_title_part_2') }}</h1>
@@ -167,9 +162,17 @@
                     :genres="serie.genres"
                     :status="serie.status"
                     :url="serie.h_id"
-                    :screenshot="'https://picsum.photos/720/1280'"
+                    :screenshot="`${$config.COVER_ENDPOINT}${serie.images.path}`"
                   />
                 </v-col>
+              </v-row>
+              <v-row class="justify-center mb-5">
+                <v-pagination
+                  v-model="pagination.page"
+                  :length="pagination.pageCount"
+                  :total-visible="6"
+                  circle
+                />
               </v-row>
             </v-container>
           </v-col>
@@ -281,12 +284,11 @@ export default {
           const resSerie = series.data.map((serie) => {
             serie.attributes.genres = JSON.parse(serie.attributes.genres)
             const status = serie.attributes.statuses.data[0].attributes
-            const images = serie.attributes.images.data
+            serie.attributes.images = serie.attributes.images.data.filter(image => image.attributes.image_type.data.attributes.name === 'cover')[0].attributes
             this.pagination = series.meta.pagination
             return {
               ...serie,
-              status,
-              images
+              status
             }
           })
           this.series = resSerie.map((serie) => {

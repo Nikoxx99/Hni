@@ -19,8 +19,8 @@
               xs="12"
               class="d-flex"
             >
-              <h1 class="align-self-center text-h5 text-md-h4 text-lg-h4">
-                {{ serie.title }} • {{ $t('episode.episode_number') }} {{ episode.episode_number }}
+              <h1 class="align-self-center text-h5 text-md-h4 text-lg-h4 font-weight-black">
+                {{ serie.title }} {{ $t('episode.episode_number') }} {{ episode.episode_number }}
               </h1>
             </v-col>
             <v-col

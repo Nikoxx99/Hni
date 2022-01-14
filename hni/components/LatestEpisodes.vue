@@ -10,14 +10,14 @@
           <v-icon class="grey--text darken-3">
             mdi-clock-outline
           </v-icon>
-          {{ $t('landpage.updated_text') }} {{ episodes ? $moment(episodes[1].attributes.createdAt).fromNow() : null }}
+          {{ $t('landpage.updated_text') }} {{ episodes ? $moment(episodes[1].createdAt).fromNow() : null }}
         </h4>
       </v-col>
     </v-row>
     <v-row v-if="episodes">
       <v-col
         v-for="(episode) in episodes"
-        :key="episode.attributes._id"
+        :key="episode._id"
         cols="12"
         lg="3"
         md="4"
@@ -25,14 +25,12 @@
         xs="6"
       >
         <EpisodeCard
-          :episode="episode.attributes._id"
-          :title="episode.attributes.serie.data.attributes.title"
-          :episodeNumber="episode.attributes.episode_number"
-          :hid="episode.attributes.serie.data.attributes.h_id"
-          :status="episode.attributes.serie.data.attributes.statuses.data[0].attributes.name"
-          :url="episode.attributes.urlName"
-          :screenshot="'https://picsum.photos/200/300'"
-          :created="episode.attributes.createdAt"
+          :episode="episode._id"
+          :title="episode.serie.title"
+          :episodeNumber="episode.episode_number"
+          :hid="episode.serie.h_id"
+          :screenshot="`${$config.SCREENSHOT_ENDPOINT}${episode.images.path}`"
+          :created="episode.createdAt"
         />
       </v-col>
     </v-row>
@@ -57,7 +55,7 @@ export default {
       const query = qs.stringify({
         populate: [
           'serie',
-          'serie.images',
+          'image',
           'serie.statuses'
         ],
         sort: ['createdAt:desc'],
@@ -72,7 +70,14 @@ export default {
         .then(res => res.json())
         .then((res) => {
           console.log(res)
-          this.episodes = res.data
+          const episodes = res.data.map((episode) => {
+            episode.attributes.serie = episode.attributes.serie.data.attributes
+            episode.attributes.images = episode.attributes.image.data.attributes
+            return {
+              ...episode.attributes
+            }
+          })
+          this.episodes = episodes
         })
     }
     // createEpisodeAd () {
