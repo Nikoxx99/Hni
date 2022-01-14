@@ -30,11 +30,13 @@
               />
             </v-col>
           </v-row>
-          <v-row>
+          <v-row v-if="$store.state.auth">
             <v-col cols="12">
               <v-btn
                 block
                 color="red accent-2"
+                elevation="0"
+                rounded
               >
                 <v-icon>mdi-heart</v-icon>
                 Fav
@@ -43,9 +45,23 @@
                 block
                 outlined
                 class="mt-4"
+                elevation="0"
+                rounded
               >
                 <v-icon>mdi-clock</v-icon>
                 Watch later
+              </v-btn>
+            </v-col>
+          </v-row>
+          <v-row v-else>
+            <v-col cols="12">
+              <v-btn
+                block
+                color="blue darken-2"
+                href="/login"
+              >
+                <v-icon>mdi-account</v-icon>
+                Login to save
               </v-btn>
             </v-col>
           </v-row>
