@@ -109,28 +109,23 @@ export default {
       this.select = null
       this.checkbox = false
     },
-    createUser () {
-      this.$apollo.mutate({
-        mutation: `mutation ($input: UserInput!){
-          createUser(input: $input){
-            success
-            token
-            username
-            errors{
-              path
-              message
-            }
-          }
-        }`,
-        variables: {
-          input: {
-            username: this.username,
-            email: this.email,
-            password: this.password
-          }
-        }
+    async createUser () {
+      await fetch(`${process.env.API_STRAPI_ENDPOINT}auth/local/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username: this.username,
+          email: this.email,
+          password: this.password
+        })
       }).then((input) => {
-        this.$router.push({ path: '/login?firstTime=true' })
+        if (input.status === 200) {
+          this.$router.push({ path: '/login?firstTime=true' })
+        } else {
+          this.loginFailed = true
+        }
       }).catch((error) => {
         // eslint-disable-next-line no-console
         console.error(error)

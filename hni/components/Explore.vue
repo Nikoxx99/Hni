@@ -251,7 +251,6 @@ export default {
     }
   },
   async mounted () {
-    await this.getSeriesCount()
     await this.getSeries()
     await this.getGenres()
     await this.prettyGenreName()
@@ -279,7 +278,6 @@ export default {
       await fetch(`${process.env.API_STRAPI_ENDPOINT}series?${query}`)
         .then(res => res.json())
         .then((series) => {
-          console.log(series)
           const resSerie = series.data.map((serie) => {
             serie.attributes.genres = JSON.parse(serie.attributes.genres)
             const status = serie.attributes.statuses.data[0].attributes
@@ -291,7 +289,6 @@ export default {
               images
             }
           })
-          console.log(resSerie)
           this.series = resSerie.map((serie) => {
             const data = serie.attributes
             return data
@@ -318,24 +315,7 @@ export default {
           const resGenres = genres.data.map((genre) => {
             return genre.attributes
           })
-          console.log(resGenres)
           this.genres = resGenres
-        })
-    },
-    async getSeriesCount () {
-      const qs = require('qs')
-      const query = qs.stringify({
-        filds: [
-          'id'
-        ]
-      },
-      {
-        encodeValuesOnly: true
-      })
-      await fetch(`${process.env.API_STRAPI_ENDPOINT}series?${query}`)
-        .then(res => res.json())
-        .then((series) => {
-          this.seriesCount = Math.floor(series.data.length / this.pagination.pageSize)
         })
     },
     selectFilter (filter) {

@@ -1,7 +1,7 @@
 <template>
   <v-card
     flat
-    color="rgba(51,51,51,0.5)"
+    color="rgba(51,51,51,0)"
   >
     <v-alert
       v-if="firstTime"
@@ -25,11 +25,8 @@
       <form @keyup.enter="login">
         <v-text-field
           v-model="username"
-          :error-messages="nameErrors"
           label="Username"
           required
-          @input="$v.username.$touch()"
-          @blur="$v.username.$touch()"
         />
         <v-text-field
           v-model="password"
@@ -43,10 +40,10 @@
       </form>
     </v-card-text>
     <v-card-text>
-      <v-btn tile text block class="my-2 blue darken-4" @click.enter="login">
+      <v-btn rounded text block class="my-2 blue darken-4" @click.enter="login">
         Login
       </v-btn>
-      <v-btn block text class="gray darken-4" href="/">
+      <v-btn block rounded text class="gray darken-4" href="/">
         Back to home
       </v-btn>
     </v-card-text>
@@ -57,7 +54,7 @@
       <p class="text-center">
         Join us and access the best Hentai in the interwebs!
       </p>
-      <v-btn block tile text class="yellow darken-4" href="/register">
+      <v-btn block rounded text class="yellow darken-4" href="/register">
         Register
       </v-btn>
     </v-card-text>
@@ -77,21 +74,6 @@ export default {
     firstTime: false,
     loginFailed: false
   }),
-
-  computed: {
-    nameErrors () {
-      const errors = []
-      if (!this.$v.username.$dirty) { return errors }
-      !this.$v.username.maxLength && errors.push('Name must be at most 10 characters long')
-      !this.$v.username.required && errors.push('Name is required.')
-      return errors
-    },
-    passwordErrors () {
-      const errors = []
-      if (!this.$v.password.$dirty) { return errors }
-      return errors
-    }
-  },
   mounted () {
     if (this.$route.query.firstTime) {
       this.firstTime = true
@@ -105,36 +87,29 @@ export default {
       this.username = ''
       this.password = ''
     },
-    login () {
-      this.$apollo.mutate({
-        mutation: `mutation ($input: LoginInput!){
-          login(input: $input){
-            success
-            token
-            username
-            role
-            errors{
-              path
-              message
-            }
-          }
-        }`,
-        variables: {
-          input: {
-            username: this.username,
-            password: this.password
-          }
-        }
+    async login () {
+      await fetch(`${process.env.API_STRAPI_ENDPOINT}auth/local`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          identifier: this.username,
+          password: this.password
+        })
       }).then((input) => {
-        if (input.data.login.success) {
-          const auth = {
-            accessToken: input.data.login.token,
-            username: input.data.login.username,
-            role: input.data.login.role
-          }
-          this.$store.commit('setAuth', auth)
-          Cookie.set('auth', auth)
-          this.$router.replace('/')
+        if (input.status === 200) {
+          Promise.resolve(input.json())
+            .then((res) => {
+              const auth = {
+                accessToken: res.jwt,
+                username: res.user.username,
+                level: res.user.level
+              }
+              this.$store.commit('setAuth', auth)
+              Cookie.set('auth', JSON.stringify(auth))
+              this.$router.replace('/')
+            })
         } else {
           this.loginFailed = true
         }

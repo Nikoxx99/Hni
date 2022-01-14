@@ -65,7 +65,7 @@
                   <v-slide-item
                     v-for="player in episode.players"
                     :key="player.name"
-                    v-slot:default="{ active, toggle }"
+                    v-slot:="{ active, toggle }"
                   >
                     <v-btn
                       class="mx-2"
@@ -89,7 +89,7 @@
                 v-model="modalDownload"
                 width="900"
               >
-                <template v-slot:activator="{ on, attrs }">
+                <template #activator="{ on, attrs }">
                   <v-btn
                     color="blue darken-4"
                     dark
@@ -361,7 +361,6 @@ export default {
               ...episode
             }
           })
-          console.log(res[0])
           const resEpisode = res[0].attributes
           const resSerie = res[0].attributes.serie.data.attributes
           const resStatuses = res[0].attributes.serie.data.attributes.statuses.data[0].attributes

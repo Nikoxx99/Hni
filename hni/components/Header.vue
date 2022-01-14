@@ -40,7 +40,7 @@
             :key="rs.attributes.name"
             bottom
           >
-            <template v-slot:activator="{ on, attrs }">
+            <template #activator="{ on, attrs }">
               <v-btn
                 icon
                 large
@@ -89,7 +89,7 @@
         </v-list>
       </v-menu>
       <v-tooltip v-if="!$store.state.auth" bottom>
-        <template v-slot:activator="{ on, attrs }">
+        <template #activator="{ on, attrs }">
           <v-btn
             icon
             large
@@ -104,7 +104,7 @@
       </v-tooltip>
       <div v-else class="d-none d-sm-flex d-md-flex d-lg-flex">
         <v-tooltip bottom>
-          <template v-slot:activator="{ on, attrs }">
+          <template #activator="{ on, attrs }">
             <v-btn
               icon
               large
@@ -118,8 +118,8 @@
           </template>
           <span>{{ $t('menu.user_profile') }}</span>
         </v-tooltip>
-        <v-tooltip v-if="$store.state.auth.role === 2" bottom>
-          <template v-slot:activator="{ on, attrs }">
+        <v-tooltip v-if="$store.state.auth.level === 2" bottom>
+          <template #activator="{ on, attrs }">
             <v-btn
               icon
               large
@@ -133,7 +133,7 @@
           <span>{{ $t('menu.admin_panel_button') }}</span>
         </v-tooltip>
         <v-tooltip bottom>
-          <template v-slot:activator="{ on, attrs }">
+          <template #activator="{ on, attrs }">
             <v-btn
               icon
               large
