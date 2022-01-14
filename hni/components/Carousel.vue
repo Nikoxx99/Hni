@@ -1,5 +1,12 @@
 <template>
-  <v-carousel v-if="featuredSeries" v-model="model" :show-arrows="false">
+  <v-carousel
+    v-if="featuredSeries"
+    v-model="model"
+    :show-arrows="false"
+    height="600"
+    cycle
+    interval="4000"
+  >
     <v-carousel-item
       v-for="serie in featuredSeries"
       :key="serie.title"

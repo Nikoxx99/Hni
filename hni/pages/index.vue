@@ -3,9 +3,9 @@
     <Header />
     <Carousel />
     <TagCloud />
-    <LatestEpisodes />
-    <v-container><v-divider /></v-container>
     <LatestSeries />
+    <v-container><v-divider /></v-container>
+    <LatestEpisodes />
     <MobileHeader />
   </div>
 </template>
