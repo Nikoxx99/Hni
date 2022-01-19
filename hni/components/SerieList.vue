@@ -85,7 +85,7 @@
               <v-tooltip top>
                 <template #activator="{ on, attrs }">
                   <v-btn
-                    :to="'/panel/serie/' + item._id + '/episode/create'"
+                    :to="'/panel/serie/' + item.id + '/episode/create'"
                     v-bind="attrs"
                     v-on="on"
                   >
@@ -99,7 +99,7 @@
               <v-tooltip top>
                 <template #activator="{ on, attrs }">
                   <v-btn
-                    :to="'/panel/serie/' + item._id + '/episodes'"
+                    :to="'/panel/serie/' + item.id + '/episodes'"
                     v-bind="attrs"
                     v-on="on"
                   >
@@ -113,7 +113,7 @@
               <v-tooltip top>
                 <template #activator="{ on, attrs }">
                   <v-btn
-                    :to="'/panel/serie/' + item._id + '/edit'"
+                    :to="'/panel/serie/' + item.id + '/edit'"
                     v-bind="attrs"
                     v-on="on"
                   >
@@ -124,7 +124,7 @@
                 </template>
                 <span>Edit Serie</span>
               </v-tooltip>
-              <DeleteModalDeleteSerie :title="item.title" :serieid="item._id" />
+              <DeleteModalDeleteSerie :title="item.title" :serieid="item.id" />
             </template>
           </v-data-table>
         </client-only>
