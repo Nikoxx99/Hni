@@ -15,7 +15,7 @@
           elevation
         >
           <v-card-title>
-            Initial information
+            Initial information of {{ serie.h_id }}
           </v-card-title>
           <v-container>
             <v-text-field
@@ -38,7 +38,7 @@
               outlined
             />
             <v-autocomplete
-              v-model="serie.genres"
+              v-model="serie.genreList"
               :items="genreList"
               label="Hentai Genres"
               item-text="name"
@@ -56,7 +56,6 @@
               outlined
               item-text="name"
               item-value="id"
-              filled
               label="Serie Type"
             />
             <v-select
@@ -164,22 +163,22 @@ export default {
   name: 'CreateSerie',
   data: () => ({
     serie: {
-      title: '',
-      title_english: '',
-      synopsis: '',
+      title: '123',
+      title_english: '123',
+      synopsis: '123',
       censorship: false,
-      next_episode: '',
+      next_episode: null,
       visits: 0,
       featured: false,
       hasEpisodes: false,
-      h_id: () => { return Math.floor(Math.random() * (666666 - 333333) + 333333) },
-      genres: null,
+      h_id: null,
+      genreList: null,
       status: null,
       language: null,
-      serie_type: null,
-      cover: [],
-      background_cover: []
+      serie_type: null
     },
+    cover: [],
+    background_cover: [],
     genreList: [],
     categories: [],
     statusList: [],
@@ -198,6 +197,7 @@ export default {
     this.getSerie_Types()
     this.getLanguageList()
     this.getStatuses()
+    this.serie.h_id = Math.floor(Math.random() * (666666 - 333333) + 333333).toString()
   },
   methods: {
     async getGenres () {
@@ -253,13 +253,14 @@ export default {
         })
     },
     async createSerie () {
+      await this.uploadImageToStrapi()
       this.isSubmitting = !this.isSubmitting
-      if (this.serie.cover < 1 || this.serie.background_cover < 1) {
+      if (this.cover < 1 || this.background_cover < 1) {
         this.error = true
         this.errorMessage = 'You must define an cover and screenshot image.'
         this.isSubmitting = false
       }
-      if (this.serie.genres < 1) {
+      if (this.serie.genreList.length < 1) {
         this.genreError = true
         this.errorMessage = 'You must select one or more genres.'
         this.isSubmitting = false
@@ -272,12 +273,7 @@ export default {
           Authorization: `Bearer ${this.$store.state.auth.accessToken}`
         },
         body: JSON.stringify({
-          data: this.serie.map((serie) => {
-            serie.genres = JSON.stringify(serie.genres)
-            return {
-              ...serie
-            }
-          })
+          data: this.serie
         })
       }).then((input) => {
         console.log(input)
@@ -293,66 +289,48 @@ export default {
         // eslint-disable-next-line no-console
         console.error(error)
       })
-
-      // this.$apollo.mutate({
-      //   mutation: gql`mutation ($input: SerieInput){
-      //     createSerie(input: $input){
-      //       success
-      //       errors{
-      //         path
-      //         message
-      //       }
-      //     }
-      //   }`,
-      //   variables: {
-      //     input: {
-      //       title: this.serie.title,
-      //       title_english: this.serie.title_english,
-      //       synopsis: this.serie.synopsis,
-      //       genres: this.serie.genres,
-      //       status: this.serie.status,
-      //       serie_type: this.serie.serie_type,
-      //       next_episode: this.serie.next_episode,
-      //       censorship: this.serie.censorship,
-      //       cover: this.serie.cover,
-      //       background_cover: this.serie.background_cover
-      //     }
-      //   }
-      // }).then((input) => {
-      //   if (input.data.createSerie.success) {
-      //     this.$router.push({ path: '/panel/serie', query: { created: true } }, () => { window.location.reload(true) }, () => { window.location.reload(true) })
-      //   } else {
-      //     this.error = true
-      //     this.alertBoxColor = 'red darken-4'
-      //     this.errorMessage = input.data.createSerie.errors[0].message
-      //     this.isSubmitting = false
-      //   }
-      // }).catch((error) => {
-      //   // eslint-disable-next-line no-console
-      //   this.error = true
-      //   this.errorMessage = error
-      // })
+    },
+    async uploadImageToStrapi () {
+      const formData = new FormData()
+      formData.append('files', this.cover, `${this.serie.title}_cover`)
+      formData.append('files', this.background_cover, `${this.serie.title}_screenshot`)
+      await fetch(`${process.env.API_STRAPI_ENDPOINT}upload`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${this.$store.state.auth.accessToken}`
+        },
+        body: formData
+      }).then((input) => {
+        if (input.status === 200) {
+          Promise.resolve(input.json())
+            .then((res) => {
+              return res
+            })
+        } else {
+          throw new Error('Upload failed')
+        }
+      }).catch((error) => {
+        // eslint-disable-next-line no-console
+        console.error(error)
+      })
     },
     coverSelected (e) {
-      this.serie.cover = []
-      this.serie.cover.push(this.$refs.cover.$refs.input.files[0])
-      this.serie.cover.push(this.serie.title)
-      if (this.serie.cover !== undefined) {
+      this.cover = this.$refs.cover.$refs.input.files[0]
+      if (this.cover !== undefined) {
         this.coverPreview = URL.createObjectURL(this.$refs.cover.$refs.input.files[0])
       }
     },
     background_coverSelected (e) {
-      this.serie.background_cover.push(this.$refs.background_cover.$refs.input.files[0])
-      this.serie.background_cover.push(this.serie.title)
+      this.background_cover = this.$refs.background_cover.$refs.input.files[0]
       this.screenshotPreview = URL.createObjectURL(this.$refs.background_cover.$refs.input.files[0])
     },
     initialCoverClear () {
-      this.serie.cover = []
+      this.cover = []
       this.error = false
       this.isSubmitting = false
     },
     initialScreenshotClear () {
-      this.serie.background_cover = []
+      this.background_cover = []
       this.error = false
       this.isSubmitting = false
     }
