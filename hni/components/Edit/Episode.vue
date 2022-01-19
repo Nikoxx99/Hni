@@ -1,44 +1,44 @@
 <template>
-  <v-container>
+  <v-container v-if="episode">
     <v-row>
       <v-col cols="6">
         <v-card
           elevation
         >
           <v-card-title>
-            Edit Episode {{ episode_number }} for: {{ serie_title }}
+            Edit Episode {{ episode.episode_number }} for: {{ episode.serie.title }}
           </v-card-title>
           <v-container>
             <v-text-field
-              v-model="serie_id"
+              v-model="episode.serie"
               label="Episode From"
               readonly
               required
             />
             <v-text-field
-              v-model.number="episode_number"
+              v-model.number="episode.episode_number"
               label="Episode Number"
               type="number"
               required
             />
             <v-switch
-              v-model="visible"
+              v-model="episode.visible"
               label="Is Visible?"
             />
             <v-select
-              v-model="language"
-              :items="languages"
+              v-model="episode.language"
+              :items="languageList"
               filled
               label="Language"
             />
             <v-switch
-              v-model="hasCustomScreenshot"
+              v-model="episode.hasCustomScreenshot"
               label="Change Custom Image?"
               prepend-icon="mdi-image"
               @change="detectNewImage"
             />
             <v-file-input
-              v-if="hasCustomScreenshot"
+              v-if="episode.hasCustomScreenshot"
               ref="screenshot"
               accept="image/*"
               label="Select a Custom Image"
@@ -52,15 +52,15 @@
               submit
             </v-btn>
           </v-container>
-          <v-container v-if="screenshot && !hasCustomScreenshot">
+          <v-container v-if="!hasCustomScreenshot">
             <h2>Current Screenshot Image</h2>
             <v-row>
               <v-img
-                :src="`${CDN}/screenshot/${screenshot}`"
+                :src="`${$config.SCREENSHOT_ENDPOINT}${screenshot}`"
               />
             </v-row>
           </v-container>
-          <v-container v-if="customScreenshot && hasCustomScreenshot">
+          <v-container v-if="hasCustomScreenshot">
             <h2>Custom Screenshot Image</h2>
             <v-row>
               <v-img
@@ -78,8 +78,8 @@
             Player Information
           </v-card-title>
           <v-container>
-            <PlayerInput
-              v-for="(player, index) in playerList"
+            <TemplatePlayerInput
+              v-for="(player, index) in episode.players"
               :id="'container'+index"
               :key="index"
               :index="index"
@@ -89,6 +89,7 @@
                 slot="playerList"
                 v-model="player.name"
                 :items="players"
+                item-text="name"
                 label="Player Select"
                 hide-details
                 solo
@@ -107,7 +108,7 @@
               >
                 <v-icon>mdi-delete</v-icon>
               </v-btn>
-            </PlayerInput>
+            </TemplatePlayerInput>
             <v-btn class="mr-4 blue darken-4" large @click="addPlayerSlot">
               Add Player
             </v-btn>
@@ -120,8 +121,8 @@
             Download Links
           </v-card-title>
           <v-container>
-            <DownloadInput
-              v-for="(download, index) in downloadList"
+            <TemplateDownloadInput
+              v-for="(download, index) in episode.downloads"
               :id="'container'+index"
               :key="index"
               :index="index"
@@ -140,7 +141,7 @@
               >
                 <v-icon>mdi-delete</v-icon>
               </v-btn>
-            </DownloadInput>
+            </TemplateDownloadInput>
             <v-btn class="mr-4 blue darken-4" large @click="addDownloadSlot">
               Add Download
             </v-btn>
@@ -152,142 +153,109 @@
 </template>
 
 <script>
-
-
-
-import PlayerInput from '../Template/PlayerInput'
-import DownloadInput from '../Template/DownloadInput'
 export default {
   name: 'EditEpisode',
-  components: {
-    PlayerInput,
-    DownloadInput
-  },
-  mixins: [validationMixin],
-
-  validations: {
-    name: { required, maxLength: minLength(1) }
-  },
   data: () => ({
     currentCounter: 0,
-    serie_id: '',
-    serie_title: '',
-    episode_id: '',
-    episode_number: '',
-    created_at: '',
-    visible: true,
-    language: '',
-    languages: ['ENGLISH', 'RUSSIAN', 'SPANISH'],
+    episode: null,
+    serie: null,
+    players: null,
+    languageList: null,
     hasCustomScreenshot: false,
     customScreenshot: [],
     screenshot: '',
     screenshotPreview: '',
-    playerList: [],
-    players: [],
-    downloadList: [],
     CDN: process.env.CDN_URI
   }),
-
-  computed: {
-  },
-  created () {
-    this.$apollo.query({
-      query: `query ($episode_id: ID){
-        Episode(_id: $episode_id){
-          _id
-          serie{
-            _id
-            title
-          }
-          episode_number
-          hasCustomScreenshot
-          visible
-          screenshot
-          customScreenshotUrl
-          language
-          players{
-            name
-            code
-          }
-          downloads{
-            url
-          }
-        }
-      }`,
-      variables: {
-        episode_id: this.$route.params.episode
-      }
-    }).then((input) => {
-      this.episode_id = input.data.Episode._id
-      this.serie_id = input.data.Episode.serie._id
-      this.serie_title = input.data.Episode.serie.title
-      this.episode_number = input.data.Episode.episode_number
-      this.visible = input.data.Episode.visible
-      this.language = input.data.Episode.language
-      this.screenshot = input.data.Episode.screenshot
-      this.customScreenshot = input.data.Episode.customScreenshotUrl
-      for (let i = 0; i < input.data.Episode.players.length; i++) {
-        this.playerList.push(input.data.Episode.players[i])
-        delete this.playerList[i].__typename
-      }
-      for (let i = 0; i < input.data.Episode.downloads.length; i++) {
-        this.downloadList.push(input.data.Episode.downloads[i])
-        delete this.downloadList[i].__typename
-      }
-      if (this.customScreenshot) {
-        this.screenshot = this.customScreenshot
-      }
-    }).catch((error) => {
-      // eslint-disable-next-line no-console
-      console.error(error)
-    })
-    this.$apollo.query({
-      query: `query ($limit: Int){
-        Players(limit: $limit){
-          name
-          short_name
-        }
-      }`,
-      variables: {
-        limit: 100
-      }
-    }).then((input) => {
-      for (let i = 0; i < input.data.Players.length; i++) {
-        this.players.push(input.data.Players[i].short_name)
-      }
-    }).catch((error) => {
-      // eslint-disable-next-line no-console
-      console.error(error)
-    })
+  async mounted () {
+    await this.getLanguageList()
+    await this.getPlayers()
+    await this.getEpisode()
   },
   methods: {
-    editEpisode () {
-      this.$apollo.mutate({
-        mutation: gql`mutation ($input: EditEpisodeInput){
-          editEpisode(input: $input){
-            success
-            errors{
-              path
-              message
+    async getEpisode () {
+      const qs = require('qs')
+      const query = qs.stringify({
+        populate: [
+          'serie',
+          'serie.language',
+          'image'
+        ]
+      },
+      {
+        encodeValuesOnly: true
+      })
+      await fetch(`${process.env.API_STRAPI_ENDPOINT}episodes/${this.$route.params.episode}?${query}`)
+        .then(res => res.json())
+        .then((input) => {
+          const res = []
+          res.push(input)
+          const loop = res.map((res) => {
+            res.data.attributes.id = res.data.id
+            res.data.attributes.serie.data.attributes.id = res.data.attributes.serie.data.id
+            res.data.attributes.serie = res.data.attributes.serie.data.attributes
+            res.data.attributes.serie.language.data.attributes.id = res.data.attributes.serie.language.data.id
+            res.data.attributes.serie.language = res.data.attributes.serie.language.data.attributes
+            res.data.attributes.image.data.attributes.id = res.data.attributes.image.data.id
+            this.screenshot = res.data.attributes.image.data.attributes.path
+            res.data.attributes.image = res.data.attributes.image.data.attributes.id
+            res.data.attributes.players = JSON.parse(res.data.attributes.players)
+            res.data.attributes.downloads = JSON.parse(res.data.attributes.downloads)
+            delete res.data.attributes.createdAt
+            delete res.data.attributes.updatedAt
+            delete res.data.attributes.publishedAt
+            return {
+              ...res.data.attributes
             }
-          }
-        }`,
-        variables: {
-          input: {
-            _id: this.episode_id,
-            serie_id: this.serie_id,
-            episode_number: this.episode_number,
-            visible: this.visible,
-            language: this.language,
-            screenshot: this.screenshot,
-            customScreenshot: this.customScreenshot,
-            players: this.playerList,
-            downloads: this.downloadList
-          }
-        }
+          })
+          this.episode = loop[0]
+          this.episode.serie = loop[0].serie.id
+        })
+    },
+    async getPlayers () {
+      await fetch(`${process.env.API_STRAPI_ENDPOINT}players`)
+        .then(res => res.json())
+        .then((input) => {
+          const players = input.data.map((res) => {
+            res.attributes.id = res.id
+            return {
+              ...res.attributes
+            }
+          })
+          this.players = players
+        })
+    },
+    async getLanguageList () {
+      await fetch(`${process.env.API_STRAPI_ENDPOINT}languages`)
+        .then(res => res.json())
+        .then((input) => {
+          const res = input.data.map((language) => {
+            language.attributes.id = language.id
+            return {
+              ...language.attributes
+            }
+          })
+          this.languageList = res
+        })
+    },
+    async editEpisode () {
+      this.episode.players = JSON.stringify(this.episode.players)
+      this.episode.downloads = JSON.stringify(this.episode.downloads)
+      await fetch(`${process.env.API_STRAPI_ENDPOINT}episodes/${this.$route.params.episode}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.$store.state.auth.accessToken}`
+        },
+        body: JSON.stringify({
+          data: this.episode
+        })
       }).then((input) => {
-        this.$router.push({ path: '/panel/serie/' + this.serie_id + '/episodes', query: { edited: true } })
-        // this.$router.push({ path: '/panel/serie/' })
+        if (input.status === 200) {
+          this.$router.push({ path: `/panel/serie/${this.episode.serie}/episodes`, query: { edited: true } })
+        } else {
+          throw new Error('Error creating serie')
+        }
       }).catch((error) => {
         // eslint-disable-next-line no-console
         console.error(error)

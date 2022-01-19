@@ -27,9 +27,6 @@
     "visible": {
       "type": "boolean"
     },
-    "urlName": {
-      "type": "string"
-    },
     "serie": {
       "type": "relation",
       "relation": "manyToOne",

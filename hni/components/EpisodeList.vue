@@ -76,7 +76,7 @@
                   <v-tooltip top>
                     <template #activator="{ on, attrs }">
                       <v-btn
-                        :href="`/panel/serie/${serie.id}/episode/${episode.id}/edit`"
+                        :to="`/panel/serie/${serie.id}/episodes/${episode.id}/edit`"
                         v-bind="attrs"
                         v-on="on"
                       >
