@@ -279,7 +279,7 @@ export default {
         },
         body: JSON.stringify({
           data: {
-            path: image.url,
+            path: image.hash,
             image_type: imageType === 'cover' ? 1 : 2,
             series: serieId
           }

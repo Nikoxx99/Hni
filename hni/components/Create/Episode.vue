@@ -35,14 +35,6 @@
               label="Is Visible?"
               outlined
             />
-            <v-select
-              v-model="episode.language"
-              :items="languageList"
-              item-text="name"
-              item-value="id"
-              outlined
-              label="Language"
-            />
             <v-switch
               v-model="episode.hasCustomScreenshot"
               label="Use Custom Image?"
@@ -205,7 +197,6 @@ export default {
   }),
   async mounted () {
     this.episode.serie = parseInt(this.$route.params.id)
-    await this.getLanguageList()
     await this.getPlayers()
     await this.getSerie()
   },
@@ -225,11 +216,7 @@ export default {
         })
       }).then((input) => {
         if (input.status === 200) {
-          this.isSubmitting = !this.isSubmitting
-          this.alert = true
-          this.alertType = 'info'
-          this.alertMessage = 'Serie created successfully.'
-          this.$router.push({ path: `/panel/serie/${this.serie.id}/episodes`, query: { created: true } }, () => { window.location.reload(true) }, () => { window.location.reload(true) })
+          this.$router.push({ path: `/panel/serie/${this.serie.id}/episodes`, query: { created: true } })
         } else {
           throw new Error('Error creating serie')
         }
@@ -281,19 +268,6 @@ export default {
             }
           })
           this.players = players
-        })
-    },
-    async getLanguageList () {
-      await fetch(`${process.env.API_STRAPI_ENDPOINT}languages`)
-        .then(res => res.json())
-        .then((input) => {
-          const res = input.data.map((language) => {
-            language.attributes.id = language.id
-            return {
-              ...language.attributes
-            }
-          })
-          this.languageList = res
         })
     },
     createPlayerUrl (player, code, index) {

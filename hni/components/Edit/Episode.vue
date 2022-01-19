@@ -25,12 +25,6 @@
               v-model="episode.visible"
               label="Is Visible?"
             />
-            <v-select
-              v-model="episode.language"
-              :items="languageList"
-              filled
-              label="Language"
-            />
             <v-switch
               v-model="episode.hasCustomScreenshot"
               label="Change Custom Image?"
@@ -53,7 +47,9 @@
             </v-btn>
           </v-container>
           <v-container v-if="!hasCustomScreenshot">
-            <h2>Current Screenshot Image</h2>
+            <v-row>
+              <h2>Current Screenshot Image</h2>
+            </v-row>
             <v-row>
               <v-img
                 :src="`${$config.SCREENSHOT_ENDPOINT}${screenshot}`"
@@ -168,7 +164,6 @@ export default {
     CDN: process.env.CDN_URI
   }),
   async mounted () {
-    await this.getLanguageList()
     await this.getPlayers()
     await this.getEpisode()
   },
@@ -223,19 +218,6 @@ export default {
             }
           })
           this.players = players
-        })
-    },
-    async getLanguageList () {
-      await fetch(`${process.env.API_STRAPI_ENDPOINT}languages`)
-        .then(res => res.json())
-        .then((input) => {
-          const res = input.data.map((language) => {
-            language.attributes.id = language.id
-            return {
-              ...language.attributes
-            }
-          })
-          this.languageList = res
         })
     },
     async editEpisode () {

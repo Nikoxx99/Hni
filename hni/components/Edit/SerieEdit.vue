@@ -212,7 +212,7 @@ export default {
           this.snack = true
           this.snackColor = 'info'
           this.snackText = 'Serie edited successfully!'
-          this.$router.replace('/serie')
+          this.$router.replace('/panel/serie')
         }
       }).catch((error) => {
         // eslint-disable-next-line no-console
