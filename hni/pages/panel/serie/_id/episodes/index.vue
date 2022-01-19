@@ -7,13 +7,9 @@
 </template>
 
 <script>
-import EpisodeList from '../../../../../components/EpisodeList'
 export default {
   layout: 'panel',
   middleware: 'authenticated',
-  components: {
-    EpisodeList
-  },
   data () {
     return {
     }

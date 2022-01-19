@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container v-if="serie">
     <v-alert
       v-if="alertBox"
       type="info"
@@ -19,26 +19,26 @@
             class="white--text align-end"
             height="50vh"
             width="auto"
-            :src="`${CDN}/cover/${series.coverUrl}`"
+            :src="`${$config.COVER_ENDPOINT}${serie.images.cover.path}`"
           >
-            <v-card-title>{{ series.title }}</v-card-title>
+            <v-card-title>{{ serie.title }}</v-card-title>
           </v-img>
           <v-card-subtitle class="pb-0">
-            English: {{ series.title_english }}
+            English: {{ serie.title_english }}
           </v-card-subtitle>
           <v-card-subtitle class="pb-0">
-            Episodes: {{ series.episodes.length }}
+            Episodes: {{ serie.episodes.length }}
           </v-card-subtitle>
 
           <v-card-text class="text--primary">
-            <div>{{ series.synopsis }}</div>
+            <div>{{ serie.synopsis }}</div>
           </v-card-text>
 
           <v-card-actions>
             <v-btn
               color="green"
               text
-              :href="'/panel/serie/' + url + '/episode/create'"
+              :to="`/panel/serie/${serie.id}/episode/create`"
             >
               Add Episode
             </v-btn>
@@ -46,7 +46,7 @@
             <v-btn
               color="orange"
               text
-              :href="'/panel/serie/' + url + '/edit'"
+              :to="`/panel/serie/${serie.id}/edit`"
             >
               Edit Serie
             </v-btn>
@@ -55,7 +55,7 @@
       </v-col>
       <v-col cols="9">
         <v-simple-table width="100%">
-          <template v-slot:default>
+          <template #default>
             <thead>
               <tr>
                 <th class="text-left">
@@ -68,15 +68,15 @@
             </thead>
             <tbody>
               <tr
-                v-for="episode in series.episodes"
-                :key="episode._id"
+                v-for="episode in serie.episodes"
+                :key="episode.id"
               >
                 <td>{{ episode.episode_number }}</td>
                 <td>
                   <v-tooltip top>
-                    <template v-slot:activator="{ on, attrs }">
+                    <template #activator="{ on, attrs }">
                       <v-btn
-                        :href="'/panel/serie/' + url + '/episodes/' + episode._id + '/edit'"
+                        :href="`/panel/serie/${serie.id}/episode/${episode.id}/edit`"
                         v-bind="attrs"
                         v-on="on"
                       >
@@ -87,7 +87,7 @@
                     </template>
                     <span>Edit Episode</span>
                   </v-tooltip>
-                  <ModalDeleteEpisode :episodenumber="episode.episode_number" :episodeid="episode._id" :serieid="$route.params.id" />
+                  <DeleteModalDeleteEpisode :episodenumber="episode.episode_number" :episodeid="episode.id" :serieid="$route.params.id" />
                 </td>
               </tr>
             </tbody>
@@ -99,30 +99,15 @@
 </template>
 
 <script>
-
-import ModalDeleteEpisode from './Delete/ModalDeleteEpisode'
 export default {
   name: 'EpisodeList',
-  components: {
-    ModalDeleteEpisode
-  },
   data: () => ({
-    series: {
-      title: '',
-      title_english: '',
-      synopsis: '',
-      episodes: {
-        _id: ''
-      },
-      coverUrl: 'load.jpg'
-    },
-    url: '',
-    CDN: process.env.CDN_URI,
+    serie: null,
     alertBox: false,
     alertBoxColor: '',
     createdMessage: ''
   }),
-  created () {
+  async mounted () {
     if (this.$route.query.created) {
       this.alertBox = true
       this.alertBoxColor = 'blue darken-4'
@@ -138,33 +123,55 @@ export default {
       this.alertBoxColor = 'red darken-4'
       this.createdMessage = 'Episode Deleted Successfully.'
     }
-    this.$apollo.query({
-      query: `query ($id: ID){
-        Serie(_id: $id){
-          title
-          title_english
-          synopsis
-          visits
-          episodes {
-            _id
-            serie{
-              _id
+    await this.getSerie()
+  },
+  methods: {
+    async getSerie () {
+      const qs = require('qs')
+      const query = qs.stringify({
+        populate: [
+          'genreList',
+          'status',
+          'images',
+          'images.image_type',
+          'language',
+          'serie_type',
+          'episodes'
+        ]
+      },
+      {
+        encodeValuesOnly: true
+      })
+      await fetch(`${process.env.API_STRAPI_ENDPOINT}series/${this.$route.params.id}?${query}`)
+        .then(res => res.json())
+        .then((input) => {
+          const res = []
+          res.push(input)
+          const loop = res.map((res) => {
+            res.data.attributes.id = res.data.id
+            res.data.attributes.status.data.attributes.id = res.data.attributes.status.data.id
+            res.data.attributes.status = res.data.attributes.status.data.attributes
+            res.data.attributes.language.data.attributes.id = res.data.attributes.language.data.id
+            res.data.attributes.language = res.data.attributes.language.data.attributes
+            res.data.attributes.serie_type.data.attributes.id = res.data.attributes.serie_type.data.id
+            res.data.attributes.serie_type = res.data.attributes.serie_type.data.attributes
+            res.data.attributes.images.cover = res.data.attributes.images.data.filter(image => image.attributes.image_type.data.attributes.name === 'cover')[0].attributes
+            res.data.attributes.images.screenshot = res.data.attributes.images.data.filter(image => image.attributes.image_type.data.attributes.name === 'screenshot')[0].attributes
+            res.data.attributes.episodes = res.data.attributes.episodes.data.map((episodes) => {
+              episodes.attributes.id = episodes.id
+              return episodes.attributes
+            })
+            res.data.attributes.genreList = res.data.attributes.genreList.data.map((genre) => {
+              genre.attributes.id = genre.id
+              return genre.attributes
+            })
+            return {
+              ...res.data.attributes
             }
-            episode_number
-          }
-          coverUrl
-        }
-      }`,
-      variables: {
-        id: this.$route.params.id
-      }
-    }).then((input) => {
-      this.series = input.data.Serie
-      this.url = this.$route.params.id
-    }).catch((error) => {
-      // eslint-disable-next-line no-console
-      console.error(error)
-    })
+          })
+          this.serie = loop[0]
+        })
+    }
   }
 }
 </script>

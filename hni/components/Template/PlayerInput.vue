@@ -24,9 +24,6 @@
 
 <script>
 export default {
-  name: 'PlayerInput',
-  data: () => ({
-    items: ['Foo', 'Bar', 'Fizz', 'Buzz']
-  })
+  name: 'PlayerInput'
 }
 </script>

@@ -29,7 +29,7 @@
           :title="episode.serie.title"
           :episodeNumber="episode.episode_number"
           :hid="episode.serie.h_id"
-          :screenshot="`${$config.SCREENSHOT_ENDPOINT}${episode.images.path}`"
+          :screenshot="`${$config.SCREENSHOT_ENDPOINT}${episode.image ? episode.image.path : null}`"
           :created="episode.createdAt"
         />
       </v-col>
@@ -72,7 +72,7 @@ export default {
           console.log(res)
           const episodes = res.data.map((episode) => {
             episode.attributes.serie = episode.attributes.serie.data.attributes
-            episode.attributes.images = episode.attributes.image.data.attributes
+            episode.attributes.image = episode.attributes.image.data.attributes
             return {
               ...episode.attributes
             }
