@@ -20,49 +20,64 @@
           <v-container>
             <v-text-field
               v-model="serie.title"
-              :rules="titleRules"
               label="Hentai Title"
               required
+              outlined
             />
             <v-text-field
               v-model="serie.title_english"
               label="Hentai English Title"
+              outlined
             />
             <v-textarea
               v-model="serie.synopsis"
-              :rules="synopsisRules"
               name="synopsis"
               label="Synopsis"
               value="Como comenzo con el que tenia el peinado follador..."
               hint="Describe the Hentai"
+              outlined
             />
-            <v-combobox
+            <v-autocomplete
               v-model="serie.genres"
               :items="genreList"
-              :error="genreError"
               label="Hentai Genres"
+              item-text="name"
+              item-value="id"
               multiple
               clearable
               deletable-chips
+              outlined
               chips
-              :return-object="true"
-              @click="genreError = false"
+              :return-object="false"
             />
             <v-select
               v-model="serie.serie_type"
-              :items="categories"
+              :items="serie_typeList"
+              outlined
+              item-text="name"
+              item-value="id"
               filled
-              label="Category"
+              label="Serie Type"
             />
             <v-select
               v-model="serie.status"
               :items="statusList"
-              filled
+              item-text="name"
+              item-value="id"
+              outlined
               label="Status"
+            />
+            <v-select
+              v-model="serie.language"
+              :items="languageList"
+              item-text="name"
+              item-value="id"
+              outlined
+              label="Language"
             />
             <v-switch
               v-model="serie.censorship"
-              filled
+              outlined
               label="Censorship"
             />
           </v-container>
@@ -101,7 +116,7 @@
               offset-y
               min-width="290px"
             >
-              <template v-slot:activator="{ on }">
+              <template #activator="{ on }">
                 <v-text-field
                   v-model="serie.next_episode"
                   label="Next episode on"
@@ -145,40 +160,32 @@
 </template>
 
 <script>
-
-
-
 export default {
   name: 'CreateSerie',
-  mixins: [validationMixin],
-
-  validations: {
-    name: { required, maxLength: minLength(1) }
-  },
-
   data: () => ({
     serie: {
       title: '',
       title_english: '',
       synopsis: '',
-      genres: [],
-      serie_type: 'HENTAI',
-      status: '',
-      next_episode: '',
       censorship: false,
+      next_episode: '',
+      visits: 0,
+      featured: false,
+      hasEpisodes: false,
+      h_id: () => { return Math.floor(Math.random() * (666666 - 333333) + 333333) },
+      genres: null,
+      status: null,
+      language: null,
+      serie_type: null,
       cover: [],
       background_cover: []
     },
-    titleRules: [
-      v => !!v || 'Title is required'
-    ],
-    synopsisRules: [
-      v => !!v || 'Synopsis is required'
-    ],
     genreList: [],
     categories: [],
+    statusList: [],
+    languageList: [],
+    serie_typeList: [],
     genreError: false,
-    statusList: ['AIRING', 'FINALIZED'],
     coverPreview: '',
     screenshotPreview: '',
     error: false,
@@ -186,51 +193,66 @@ export default {
     alertBoxColor: '',
     isSubmitting: false
   }),
-
-  computed: {
-  },
-  created () {
-    this.$apollo.query({
-      query: `query ($limit: Int){
-        Genres(limit: $limit){
-          text
-        }
-      }`,
-      variables: {
-        limit: 100
-      }
-    }).then((input) => {
-      for (let i = 0; i < input.data.Genres.length; i++) {
-        this.genreList.push({
-          text: input.data.Genres[i].text,
-          value: input.data.Genres[i].text
-        })
-      }
-    }).catch((error) => {
-      // eslint-disable-next-line no-console
-      console.error(error)
-    })
-    this.$apollo.query({
-      query: `query ($limit: Int){
-        Categories(limit: $limit){
-          name
-        }
-      }`,
-      variables: {
-        limit: 100
-      }
-    }).then((input) => {
-      // eslint-disable-next-line no-console
-      for (let i = 0; i < input.data.Categories.length; i++) {
-        this.categories.push(input.data.Categories[i].name)
-      }
-    }).catch((error) => {
-      // eslint-disable-next-line no-console
-      console.error(error)
-    })
+  mounted () {
+    this.getGenres()
+    this.getSerie_Types()
+    this.getLanguageList()
+    this.getStatuses()
   },
   methods: {
-    createSerie () {
+    async getGenres () {
+      await fetch(`${process.env.API_STRAPI_ENDPOINT}genres`)
+        .then(res => res.json())
+        .then((input) => {
+          const res = input.data.map((genre) => {
+            genre.attributes.id = genre.id
+            return {
+              ...genre.attributes
+            }
+          })
+          this.genreList = res
+        })
+    },
+    async getSerie_Types () {
+      await fetch(`${process.env.API_STRAPI_ENDPOINT}serie-types`)
+        .then(res => res.json())
+        .then((input) => {
+          const res = input.data.map((serietype) => {
+            serietype.attributes.id = serietype.id
+            return {
+              ...serietype.attributes
+            }
+          })
+          this.serie_typeList = res
+        })
+    },
+    async getLanguageList () {
+      await fetch(`${process.env.API_STRAPI_ENDPOINT}languages`)
+        .then(res => res.json())
+        .then((input) => {
+          const res = input.data.map((language) => {
+            language.attributes.id = language.id
+            return {
+              ...language.attributes
+            }
+          })
+          this.languageList = res
+        })
+    },
+    async getStatuses () {
+      await fetch(`${process.env.API_STRAPI_ENDPOINT}statuses`)
+        .then(res => res.json())
+        .then((input) => {
+          const res = input.data.map((status) => {
+            status.attributes.id = status.id
+            return {
+              ...status.attributes
+            }
+          })
+          this.statusList = res
+        })
+    },
+    async createSerie () {
       this.isSubmitting = !this.isSubmitting
       if (this.serie.cover < 1 || this.serie.background_cover < 1) {
         this.error = true
@@ -242,44 +264,74 @@ export default {
         this.errorMessage = 'You must select one or more genres.'
         this.isSubmitting = false
       }
-      this.$apollo.mutate({
-        mutation: gql`mutation ($input: SerieInput){
-          createSerie(input: $input){
-            success
-            errors{
-              path
-              message
+
+      await fetch(`${process.env.API_STRAPI_ENDPOINT}series`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.$store.state.auth.accessToken}`
+        },
+        body: JSON.stringify({
+          data: this.serie.map((serie) => {
+            serie.genres = JSON.stringify(serie.genres)
+            return {
+              ...serie
             }
-          }
-        }`,
-        variables: {
-          input: {
-            title: this.serie.title,
-            title_english: this.serie.title_english,
-            synopsis: this.serie.synopsis,
-            genres: this.serie.genres,
-            status: this.serie.status,
-            serie_type: this.serie.serie_type,
-            next_episode: this.serie.next_episode,
-            censorship: this.serie.censorship,
-            cover: this.serie.cover,
-            background_cover: this.serie.background_cover
-          }
-        }
+          })
+        })
       }).then((input) => {
-        if (input.data.createSerie.success) {
-          this.$router.push({ path: '/panel/serie', query: { created: true } }, () => { window.location.reload(true) }, () => { window.location.reload(true) })
+        console.log(input)
+        if (input.status === 200) {
+          Promise.resolve(input.json())
+            .then((res) => {
+              console.log(res)
+            })
         } else {
-          this.error = true
-          this.alertBoxColor = 'red darken-4'
-          this.errorMessage = input.data.createSerie.errors[0].message
-          this.isSubmitting = false
+          this.loginFailed = true
         }
       }).catch((error) => {
         // eslint-disable-next-line no-console
-        this.error = true
-        this.errorMessage = error
+        console.error(error)
       })
+
+      // this.$apollo.mutate({
+      //   mutation: gql`mutation ($input: SerieInput){
+      //     createSerie(input: $input){
+      //       success
+      //       errors{
+      //         path
+      //         message
+      //       }
+      //     }
+      //   }`,
+      //   variables: {
+      //     input: {
+      //       title: this.serie.title,
+      //       title_english: this.serie.title_english,
+      //       synopsis: this.serie.synopsis,
+      //       genres: this.serie.genres,
+      //       status: this.serie.status,
+      //       serie_type: this.serie.serie_type,
+      //       next_episode: this.serie.next_episode,
+      //       censorship: this.serie.censorship,
+      //       cover: this.serie.cover,
+      //       background_cover: this.serie.background_cover
+      //     }
+      //   }
+      // }).then((input) => {
+      //   if (input.data.createSerie.success) {
+      //     this.$router.push({ path: '/panel/serie', query: { created: true } }, () => { window.location.reload(true) }, () => { window.location.reload(true) })
+      //   } else {
+      //     this.error = true
+      //     this.alertBoxColor = 'red darken-4'
+      //     this.errorMessage = input.data.createSerie.errors[0].message
+      //     this.isSubmitting = false
+      //   }
+      // }).catch((error) => {
+      //   // eslint-disable-next-line no-console
+      //   this.error = true
+      //   this.errorMessage = error
+      // })
     },
     coverSelected (e) {
       this.serie.cover = []

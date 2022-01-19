@@ -170,7 +170,7 @@ export default {
         populate: [
           'images',
           'images.image_type',
-          'statuses',
+          'status',
           'episodes'
         ]
       },
@@ -190,7 +190,7 @@ export default {
           })
           this.serie = resSerie[0].attributes
           this.genres = resSerie[0].attributes.genres
-          this.status = resSerie[0].attributes.statuses.data[0].attributes.name
+          this.status = resSerie[0].attributes.status.data.attributes.name
           const episodes = resSerie[0].attributes.episodes.data.map((episode) => {
             return {
               ...episode.attributes

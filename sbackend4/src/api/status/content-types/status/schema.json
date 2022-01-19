@@ -16,9 +16,9 @@
     },
     "series": {
       "type": "relation",
-      "relation": "manyToMany",
+      "relation": "oneToMany",
       "target": "api::serie.serie",
-      "mappedBy": "statuses"
+      "mappedBy": "status"
     }
   }
 }

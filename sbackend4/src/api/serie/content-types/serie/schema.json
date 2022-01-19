@@ -36,15 +36,15 @@
     "hasEpisodes": {
       "type": "boolean"
     },
-    "statuses": {
+    "status": {
       "type": "relation",
-      "relation": "manyToMany",
+      "relation": "manyToOne",
       "target": "api::status.status",
       "inversedBy": "series"
     },
-    "serie_types": {
+    "serie_type": {
       "type": "relation",
-      "relation": "manyToMany",
+      "relation": "manyToOne",
       "target": "api::serie-type.serie-type",
       "inversedBy": "series"
     },
@@ -54,9 +54,9 @@
       "target": "api::image.image",
       "inversedBy": "series"
     },
-    "languages": {
+    "language": {
       "type": "relation",
-      "relation": "manyToMany",
+      "relation": "manyToOne",
       "target": "api::language.language",
       "inversedBy": "series"
     },
@@ -71,6 +71,12 @@
     },
     "genres": {
       "type": "text"
+    },
+    "genreList": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::genre.genre",
+      "inversedBy": "series"
     }
   }
 }

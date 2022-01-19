@@ -271,7 +271,7 @@ export default {
         populate: [
           'images',
           'images.image_type',
-          'statuses',
+          'status',
           'episodes'
         ]
       },
@@ -283,7 +283,7 @@ export default {
         .then((series) => {
           const resSerie = series.data.map((serie) => {
             serie.attributes.genres = JSON.parse(serie.attributes.genres)
-            const status = serie.attributes.statuses.data[0].attributes
+            const status = serie.attributes.status.data.attributes
             serie.attributes.images = serie.attributes.images.data.filter(image => image.attributes.image_type.data.attributes.name === 'cover')[0].attributes
             this.pagination = series.meta.pagination
             return {
@@ -328,14 +328,14 @@ export default {
         return
       }
       const airingFilter = {
-        statuses: {
+        status: {
           name: {
             $eq: 'Airing'
           }
         }
       }
       const finalizedFilter = {
-        statuses: {
+        status: {
           name: {
             $eq: 'Finalized'
           }

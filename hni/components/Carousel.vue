@@ -20,7 +20,7 @@
             <v-chip
               color="blue darken-2 white--text"
             >
-              {{ serie.statuses.name }}
+              {{ serie.status.name }}
             </v-chip>
             <h1>{{ serie.title }}</h1>
             <p>{{ serie.synopsis }}</p>
@@ -67,7 +67,7 @@ export default {
         populate: [
           'images',
           'images.image_type',
-          'statuses'
+          'status'
         ],
         sort: ['createdAt:desc']
       },
@@ -80,7 +80,7 @@ export default {
           const res = series.data.map((serie) => {
             serie.attributes.genres = JSON.parse(serie.attributes.genres)
             serie = serie.attributes
-            serie.statuses = serie.statuses.data[0].attributes
+            serie.status = serie.status.data.attributes
             serie.images = serie.images.data.filter(image => image.attributes.image_type.data.attributes.name === 'screenshot')[0].attributes
             return {
               ...serie

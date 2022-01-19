@@ -180,7 +180,7 @@
                     outlined
                     rounded
                   >
-                    {{ statuses.name }}
+                    {{ status.name }}
                     <v-icon right>
                       mdi-youtube-tv
                     </v-icon>
@@ -274,7 +274,7 @@ export default {
       episode: null,
       episodes: null,
       serie: null,
-      statuses: null,
+      status: null,
       genres: null,
       downloadsName: [],
       areDownloadLinksGenerated: false,
@@ -307,24 +307,6 @@ export default {
     this.genCurrentUrl()
     this.genBreadcrumb()
     this.setUserId()
-    // this.$apollo.mutate({
-    //   mutation: gql`mutation ($input: viewInput){
-    //     viewRegister(input: $input){
-    //       success
-    //       errors{
-    //         path
-    //         message
-    //       }
-    //     }
-    //   }`,
-    //   variables: {
-    //     input: {
-    //       serie_id: this.EpisodeByUrlName.serie._id,
-    //       episode_number: this.EpisodeByUrlName.episode_number,
-    //       user_id: this.user_id
-    //     }
-    //   }
-    // })
   },
   methods: {
     async getEpisode () {
@@ -343,7 +325,7 @@ export default {
         populate: [
           'serie',
           'serie.episodes',
-          'serie.statuses'
+          'serie.status'
         ],
         sort: ['createdAt:desc']
       },
@@ -363,12 +345,12 @@ export default {
           })
           const resEpisode = res[0].attributes
           const resSerie = res[0].attributes.serie.data.attributes
-          const resStatuses = res[0].attributes.serie.data.attributes.statuses.data[0].attributes
+          const resStatus = res[0].attributes.serie.data.attributes.status.data.attributes
           const resGenres = res[0].attributes.serie.data.attributes.genres
           const resEpisodes = res[0].attributes.serie.data.attributes.episodes.data
           this.episode = resEpisode
           this.serie = resSerie
-          this.statuses = resStatuses
+          this.status = resStatus
           this.genres = resGenres
           this.episodes = resEpisodes
           for (let i = 0; i < resEpisode.serie.data.attributes.episodes.data.length; i++) {

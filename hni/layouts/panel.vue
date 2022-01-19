@@ -1,19 +1,13 @@
 <template>
   <v-app dark>
-    <ToolBar header="Hentaini Panel" />
+    <LayoutToolBar header="Hentaini Panel" />
     <nuxt />
-    <Footer />
+    <LayoutFooter />
   </v-app>
 </template>
 
 <script>
-import ToolBar from '../components/Layout/ToolBar'
-import Footer from '../components/Layout/Footer'
 export default {
-  components: {
-    ToolBar,
-    Footer
-  },
   data () {
     return {
     }
