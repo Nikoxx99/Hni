@@ -7,13 +7,9 @@
 </template>
 
 <script>
-import SerieList from '../../../components/SerieList'
 export default {
   layout: 'panel',
   middleware: 'authenticated',
-  components: {
-    SerieList
-  },
   data () {
     return {
     }

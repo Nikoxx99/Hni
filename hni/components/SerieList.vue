@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container v-if="series">
     <v-row>
       <v-col cols="12">
         <v-alert
@@ -35,39 +35,43 @@
             @page-count="pageCount = $event"
           >
             <!-- ########################### -->
-            <template v-slot:item.status="props">
+            <template #[`item.status`]="{ item }">
               <v-edit-dialog
-                :return-value.sync="props.item.plan"
+                :return-value.sync="item.status"
                 persistent
                 large
+                eager
                 cancel-text="Cancelar"
                 save-text="Guardar"
-                @save="save(props.item._id, props.item.status)"
+                @save="save(item.id, item.status)"
                 @cancel="cancel"
                 @close="close"
               >
-                <v-chip small label :class="getColorPill(props.item.status)">
-                  {{ props.item.status }}
+                <v-chip small label :class="getColorPill(item.status.name)">
+                  {{ item.status.name }}
                 </v-chip>
-                <template v-slot:input>
+                <template #input>
                   <v-select
-                    v-model="props.item.status"
+                    v-model="item.status"
                     :items="statusItems"
+                    item-text="name"
+                    item-value="name"
                     single-line
                     dense
+                    :return-object="true"
                   />
                 </template>
               </v-edit-dialog>
             </template>
             <!-- ########################### -->
-            <template v-slot:item.isFeatured="{ item }">
+            <template #[`item.isFeatured`]="{ item }">
               <v-tooltip top>
-                <template v-slot:activator="{ on, attrs }">
+                <template #activator="{ on, attrs }">
                   <v-btn
                     v-bind="attrs"
-                    :class="{ 'blue darken-4': item.isFeatured }"
+                    :class="{ 'blue darken-4': item.featured }"
                     v-on="on"
-                    @click="setFeatured(item._id, series.map(function(x) {return x._id; }).indexOf(item._id))"
+                    @click="setFeatured(item.id, series.map(function(x) {return x.id; }).indexOf(item.id))"
                   >
                     <v-icon>
                       mdi-star
@@ -77,9 +81,9 @@
                 <span>Toggle Featured</span>
               </v-tooltip>
             </template>
-            <template v-slot:item.actions="{ item }">
+            <template #[`item.actions`]="{ item }">
               <v-tooltip top>
-                <template v-slot:activator="{ on, attrs }">
+                <template #activator="{ on, attrs }">
                   <v-btn
                     :to="'/panel/serie/' + item._id + '/episode/create'"
                     v-bind="attrs"
@@ -93,7 +97,7 @@
                 <span>Create Episode</span>
               </v-tooltip>
               <v-tooltip top>
-                <template v-slot:activator="{ on, attrs }">
+                <template #activator="{ on, attrs }">
                   <v-btn
                     :to="'/panel/serie/' + item._id + '/episodes'"
                     v-bind="attrs"
@@ -107,7 +111,7 @@
                 <span>Episode List</span>
               </v-tooltip>
               <v-tooltip top>
-                <template v-slot:activator="{ on, attrs }">
+                <template #activator="{ on, attrs }">
                   <v-btn
                     :to="'/panel/serie/' + item._id + '/edit'"
                     v-bind="attrs"
@@ -120,14 +124,19 @@
                 </template>
                 <span>Edit Serie</span>
               </v-tooltip>
-              <ModalDeleteSerie :title="item.title" :serieid="item._id" />
+              <DeleteModalDeleteSerie :title="item.title" :serieid="item._id" />
             </template>
           </v-data-table>
         </client-only>
-        <div class="text-center pt-2">
-          <v-pagination v-model="page" :length="pageCount" />
-        </div>
       </v-col>
+    </v-row>
+    <v-row class="justify-center mb-5">
+      <v-pagination
+        v-model="pagination.page"
+        :length="pagination.pageCount"
+        :total-visible="6"
+        circle
+      />
     </v-row>
     <v-snackbar
       v-model="snack"
@@ -138,7 +147,7 @@
     >
       {{ snackText }}
 
-      <template v-slot:action="{ attrs }">
+      <template #action="{ attrs }">
         <v-btn v-bind="attrs" text @click="snack = false">
           Close
         </v-btn>
@@ -148,32 +157,16 @@
 </template>
 
 <script>
-
-
-
-import ModalDeleteSerie from './Delete/ModalDeleteSerie'
 export default {
   name: 'SerieList',
-  components: {
-    ModalDeleteSerie
-  },
-  mixins: [validationMixin],
-
-  validations: {
-    name: { required, maxLength: minLength(1) }
-  },
-
   data: () => ({
     search: '',
-    series: [],
+    series: null,
     alertBox: false,
     createdMessage: '',
     alertBoxColor: '',
     page: 0,
-    statusItems: [
-      'AIRING',
-      'FINALIZED'
-    ],
+    statusItems: null,
     itemsPerPage: 50,
     pageCount: 1,
     headers: [
@@ -189,11 +182,15 @@ export default {
       { text: 'Featured', sortable: true, value: 'isFeatured' },
       { text: 'Actions', sortable: false, value: 'actions' }
     ],
+    pagination: {
+      page: 1,
+      pageSize: 24
+    },
     snack: false,
     snackColor: '',
     snackText: ''
   }),
-  created () {
+  async mounted () {
     if (this.$route.query.created) {
       this.alertBox = true
       this.alertBoxColor = 'blue darken-4'
@@ -209,78 +206,106 @@ export default {
       this.alertBoxColor = 'red darken-4'
       this.createdMessage = 'Serie Deleted Successfully.'
     }
-    this.$apollo.query({
-      query: `query ($limit: Int){
-        Series(limit: $limit, showNoEpisodes: true){
-          _id
-          title
-          isFeatured
-          episodes {
-            _id
-          }
-          visits
-          status
-        }
-      }`,
-      variables: {
-        limit: 2000
-      }
-    }).then((input) => {
-      for (let i = 0; i < input.data.Series.length; i++) {
-        this.series.push(input.data.Series[i])
-      }
-    }).catch((error) => {
-      // eslint-disable-next-line no-console
-      console.error(error)
-    })
+    await this.getStatuses()
+    await this.getSeries()
   },
   methods: {
+    async getSeries () {
+      const qs = require('qs')
+      const query = qs.stringify({
+        populate: [
+          'status',
+          'episodes'
+        ],
+        sort: ['createdAt:desc'],
+        pagination: this.pagination
+      },
+      {
+        encodeValuesOnly: true
+      })
+      await fetch(`${process.env.API_STRAPI_ENDPOINT}series?${query}`)
+        .then(res => res.json())
+        .then((input) => {
+          const res = input.data.map((serie) => {
+            serie.attributes.id = serie.id
+            serie.attributes.status = serie.attributes.status.data.attributes
+            serie.attributes.episodes = serie.attributes.episodes.data.map((episode) => {
+              episode.attributes.id = episode.id
+              return episode.attributes
+            })
+            return {
+              ...serie.attributes
+            }
+          })
+          this.pagination = input.meta.pagination
+          this.series = res
+        })
+    },
+    async getStatuses () {
+      await fetch(`${process.env.API_STRAPI_ENDPOINT}statuses`)
+        .then(res => res.json())
+        .then((input) => {
+          const res = input.data.map((status) => {
+            return {
+              name: status.attributes.name
+            }
+          })
+          this.statusItems = res
+        })
+    },
     getColorPill (status) {
-      if (status === 'AIRING') {
+      if (status === 'Airing') {
         return 'blue darken-4'
       } else {
         return 'red darken-4'
       }
     },
-    setFeatured (serieid, index) {
-      this.series[index].isFeatured = !this.series[index].isFeatured
-      this.$apollo.mutate({
-        mutation: gql`mutation ($_id: ID, $state: Boolean){
-          featuredSerie(_id: $_id, state: $state){
-            success
+    async setFeatured (serieId, index) {
+      this.series[index].featured = !this.series[index].featured
+
+      await fetch(`${process.env.API_STRAPI_ENDPOINT}series/${serieId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.$store.state.auth.accessToken}`
+        },
+        body: JSON.stringify({
+          data: {
+            featured: this.series[index].featured
           }
-        }`,
-        variables: {
-          _id: serieid,
-          state: this.series[index].isFeatured
+        })
+      }).then((input) => {
+        if (input.status === 200) {
+          this.snack = true
+          this.snackColor = 'info'
+          this.snackText = 'Featured changed successfully!'
         }
+      }).catch((error) => {
+        // eslint-disable-next-line no-console
+        console.error(error)
       })
     },
-    save (serieId, newStatus) {
-      this.$apollo.mutate({
-        mutation: gql`mutation ($input: EditSerieStatusInput){
-          editSerieStatus(input: $input){
-            success
-            errors{
-              path
-              message
-            }
+    async save (serieId, newStatus) {
+      await fetch(`${process.env.API_STRAPI_ENDPOINT}series/${serieId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.$store.state.auth.accessToken}`
+        },
+        body: JSON.stringify({
+          data: {
+            status: newStatus.name === 'Airing' ? 1 : 2
           }
-        }`,
-        variables: {
-          input: {
-            _id: serieId,
-            status: newStatus
-          }
-        }
+        })
       }).then((input) => {
-        this.snack = true
-        this.snackColor = 'info'
-        this.snackText = 'Status changed successfully!'
+        if (input.status === 200) {
+          this.snack = true
+          this.snackColor = 'info'
+          this.snackText = 'Status changed successfully!'
+        }
       }).catch((error) => {
-        this.snack = true
-        this.snackColor = 'red'
-        this.snackText = error
+        // eslint-disable-next-line no-console
+        console.error(error)
       })
     },
     cancel () {
