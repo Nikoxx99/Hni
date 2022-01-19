@@ -1,13 +1,13 @@
 <template>
   <v-container>
     <v-alert
-      v-if="error || genreError"
-      type="error"
+      v-if="alert"
+      :type="alertType"
       tile
       dismissible
       outlined
     >
-      {{ errorMessage }}
+      {{ alertMessage }}
     </v-alert>
     <v-row>
       <v-col cols="6">
@@ -163,9 +163,9 @@ export default {
   name: 'CreateSerie',
   data: () => ({
     serie: {
-      title: '123',
-      title_english: '123',
-      synopsis: '123',
+      title: '',
+      title_english: '',
+      synopsis: '',
       censorship: false,
       next_episode: null,
       visits: 0,
@@ -187,9 +187,9 @@ export default {
     genreError: false,
     coverPreview: '',
     screenshotPreview: '',
-    error: false,
-    errorMessage: '',
-    alertBoxColor: '',
+    alert: false,
+    alertMessage: '',
+    alertType: '',
     isSubmitting: false
   }),
   mounted () {
@@ -200,6 +200,92 @@ export default {
     this.serie.h_id = Math.floor(Math.random() * (666666 - 333333) + 333333).toString()
   },
   methods: {
+    async createSerie () {
+      const images = [
+        this.cover,
+        this.background_cover
+      ]
+      this.isSubmitting = !this.isSubmitting
+      if (this.cover.image < 1 || this.background_cover.image < 1) {
+        this.error = true
+        this.errorMessage = 'You must define an cover and screenshot image.'
+        this.isSubmitting = false
+      }
+      if (this.serie.genreList.length < 1) {
+        this.genreError = true
+        this.errorMessage = 'You must select one or more genres.'
+        this.isSubmitting = false
+      }
+
+      await fetch(`${process.env.API_STRAPI_ENDPOINT}series`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.$store.state.auth.accessToken}`
+        },
+        body: JSON.stringify({
+          data: this.serie
+        })
+      }).then((input) => {
+        if (input.status === 200) {
+          Promise.resolve(input.json())
+            .then((res) => {
+              images.forEach((image) => {
+                this.uploadImageToStrapi(image.blob, this.serie.title, image.type, res.data.id)
+              })
+            })
+          this.isSubmitting = !this.isSubmitting
+          this.alert = true
+          this.alertType = 'info'
+          this.alertMessage = 'Serie created successfully.'
+          this.$router.replace('/panel/serie')
+        } else {
+          throw new Error('Error creating serie')
+        }
+      }).catch((error) => {
+        // eslint-disable-next-line no-console
+        console.error(error)
+      })
+    },
+    async uploadImageToStrapi (imageBlob, imageName, imageType, serieId) {
+      const formData = new FormData()
+      formData.append('files', imageBlob, `${imageName}_${imageType}`)
+      await fetch(`${process.env.API_STRAPI_ENDPOINT}upload`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${this.$store.state.auth.accessToken}`
+        },
+        body: formData
+      }).then((input) => {
+        if (input.status === 200) {
+          Promise.resolve(input.json())
+            .then((strapiRes) => {
+              this.createImageComponent(strapiRes[0], imageType, serieId)
+            })
+        } else {
+          throw new Error('Upload failed')
+        }
+      }).catch((error) => {
+        // eslint-disable-next-line no-console
+        console.error(error)
+      })
+    },
+    async createImageComponent (image, imageType, serieId) {
+      await fetch(`${process.env.API_STRAPI_ENDPOINT}images`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.$store.state.auth.accessToken}`
+        },
+        body: JSON.stringify({
+          data: {
+            path: image.url,
+            image_type: imageType === 'cover' ? 1 : 2,
+            series: serieId
+          }
+        })
+      })
+    },
     async getGenres () {
       await fetch(`${process.env.API_STRAPI_ENDPOINT}genres`)
         .then(res => res.json())
@@ -252,76 +338,16 @@ export default {
           this.statusList = res
         })
     },
-    async createSerie () {
-      await this.uploadImageToStrapi()
-      this.isSubmitting = !this.isSubmitting
-      if (this.cover < 1 || this.background_cover < 1) {
-        this.error = true
-        this.errorMessage = 'You must define an cover and screenshot image.'
-        this.isSubmitting = false
-      }
-      if (this.serie.genreList.length < 1) {
-        this.genreError = true
-        this.errorMessage = 'You must select one or more genres.'
-        this.isSubmitting = false
-      }
-
-      await fetch(`${process.env.API_STRAPI_ENDPOINT}series`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.$store.state.auth.accessToken}`
-        },
-        body: JSON.stringify({
-          data: this.serie
-        })
-      }).then((input) => {
-        console.log(input)
-        if (input.status === 200) {
-          Promise.resolve(input.json())
-            .then((res) => {
-              console.log(res)
-            })
-        } else {
-          this.loginFailed = true
-        }
-      }).catch((error) => {
-        // eslint-disable-next-line no-console
-        console.error(error)
-      })
-    },
-    async uploadImageToStrapi () {
-      const formData = new FormData()
-      formData.append('files', this.cover, `${this.serie.title}_cover`)
-      formData.append('files', this.background_cover, `${this.serie.title}_screenshot`)
-      await fetch(`${process.env.API_STRAPI_ENDPOINT}upload`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${this.$store.state.auth.accessToken}`
-        },
-        body: formData
-      }).then((input) => {
-        if (input.status === 200) {
-          Promise.resolve(input.json())
-            .then((res) => {
-              return res
-            })
-        } else {
-          throw new Error('Upload failed')
-        }
-      }).catch((error) => {
-        // eslint-disable-next-line no-console
-        console.error(error)
-      })
-    },
     coverSelected (e) {
-      this.cover = this.$refs.cover.$refs.input.files[0]
+      this.cover.blob = this.$refs.cover.$refs.input.files[0]
+      this.cover.type = 'cover'
       if (this.cover !== undefined) {
         this.coverPreview = URL.createObjectURL(this.$refs.cover.$refs.input.files[0])
       }
     },
     background_coverSelected (e) {
-      this.background_cover = this.$refs.background_cover.$refs.input.files[0]
+      this.background_cover.blob = this.$refs.background_cover.$refs.input.files[0]
+      this.background_cover.type = 'screenshot'
       this.screenshotPreview = URL.createObjectURL(this.$refs.background_cover.$refs.input.files[0])
     },
     initialCoverClear () {
