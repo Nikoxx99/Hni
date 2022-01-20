@@ -10,7 +10,7 @@
     <v-carousel-item
       v-for="serie in featuredSeries"
       :key="serie.title"
-      :src="`http://localhost:1337/cdn/screenshot/${serie.images.path}`"
+      :src="`${$config.SCREENSHOT_ENDPOINT}${serie.images.path}`"
       :href="`h/${serie.h_id}`"
       gradient="to top right, rgba(0,0,0,.8), rgba(0,0,0,.2)"
     >
